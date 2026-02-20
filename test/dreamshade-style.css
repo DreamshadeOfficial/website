@@ -41,10 +41,14 @@ a:hover {
 }
 
 .logo {
-  font-weight: 700;
-  letter-spacing: 0.25em;
-  font-size: 0.9rem;
-  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  height: 30px;
+  width: auto;
+  display: block;
 }
 
 .main-nav {
@@ -60,6 +64,51 @@ a:hover {
 
 .main-nav a:hover {
   opacity: 1;
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: 0.3rem;
+  cursor: pointer;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  margin: 4px 0;
+  background: #f5f5f5;
+}
+
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  background: #05060e;
+  border-top: 1px solid #181b27;
+}
+
+.mobile-nav.open {
+  display: block;
+}
+
+.mobile-nav ul {
+  list-style: none;
+  padding: 0.75rem 1.5rem 1.25rem;
+}
+
+.mobile-nav li + li {
+  margin-top: 0.5rem;
+}
+
+.mobile-nav a {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
 }
 
 .hero {
@@ -424,7 +473,11 @@ main {
 
 @media (max-width: 900px) {
   .main-nav {
-    display: none; /* semplice: nav nascosto su mobile; si può aggiungere un menu burger in futuro */
+    display: none;
+  }
+
+  .nav-toggle {
+    display: block;
   }
 
   .hero-content {

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DREAMSHADE</title>
+  <link rel="stylesheet" href="dreamshade-style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">
+      <img src="assets/img/logo.png" alt="Dreamshade" />
+    </div>
+    <nav class="main-nav">
+      <a href="#listen">Listen</a>
+      <a href="#tour">Tour</a>
+      <a href="#video">Video</a>
+      <a href="#band">Band</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <nav class="mobile-nav" id="mobileNav">
+    <ul>
+      <li><a href="#listen">Listen</a></li>
+      <li><a href="#tour">Tour</a></li>
+      <li><a href="#video">Video</a></li>
+      <li><a href="#band">Band</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero" id="top">
+    <div class="hero-bg"></div>
+    <div class="hero-gradient"></div>
+    <div class="hero-content">
+      <div class="hero-main">
+        <h1>DREAMSHADE</h1>
+        <p class="tagline">Modern metal from Switzerland.</p>
+        <p class="hero-sub">
+          Melodic hooks, heavy riffs and electronic textures. A modern metal
+          sound built for big stages and late‑night headphones.
+        </p>
+        <div class="hero-buttons">
+          <!-- TODO: replace # with real links -->
+          <a href="#listen" class="btn primary">Listen now</a>
+          <a href="#tour" class="btn secondary">Tour dates</a>
+        </div>
+      </div>
+      <div class="hero-album">
+        <div class="hero-album-inner"></div>
+        <div class="hero-album-meta">
+          <h3>Rise</h3>
+          <span>Latest album</span>
+          <div class="hero-platforms">
+            <!-- Replace # with real URLs -->
+            <a href="#"><img src="assets/img/icon-spotify.png" alt="Spotify" /></a>
+            <a href="#"><img src="assets/img/icon-yt.png" alt="YouTube" /></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <!-- LISTEN / RELEASES -->
+    <section class="section" id="listen">
+      <div class="section-inner">
+        <h2>New Release</h2>
+        <div class="release-grid">
+          <div class="release-cover">
+            <div class="cover-art"></div>
+          </div>
+          <div class="release-info">
+            <h3>Rise</h3>
+            <p>
+              Short description of the release. Replace this text with the
+              actual copy you use now on dreamshade.ch.
+            </p>
+            <div class="platform-links">
+              <!-- Replace # with real URLs -->
+              <a href="#" class="platform">Spotify</a>
+              <a href="#" class="platform">Apple Music</a>
+              <a href="#" class="platform">YouTube</a>
+              <a href="#" class="platform">Bandcamp</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOUR -->
+    <section class="section section-alt" id="tour">
+      <div class="section-inner">
+        <h2>Tour</h2>
+        <div class="tour-grid">
+          <!-- TODO: replace sample dates with real ones from current site -->
+          <article class="tour-card">
+            <div class="tour-date">12.04.2026</div>
+            <div class="tour-city">City, Country</div>
+            <div class="tour-venue">Venue Name</div>
+            <div class="tour-status">On sale</div>
+          </article>
+          <article class="tour-card">
+            <div class="tour-date">30.04.2026</div>
+            <div class="tour-city">City, Country</div>
+            <div class="tour-venue">Festival Name</div>
+            <div class="tour-status soldout">Sold out</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIDEO -->
+    <section class="section" id="video">
+      <div class="section-inner">
+        <h2>Video</h2>
+        <div class="video-grid">
+          <!-- TODO: replace with real YouTube embeds from dreamshade.ch -->
+          <div class="video-item">
+            <div class="video-placeholder">YouTube video 1</div>
+          </div>
+          <div class="video-item">
+            <div class="video-placeholder">YouTube video 2</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BAND / BIO -->
+    <section class="section section-alt" id="band">
+      <div class="section-inner band-layout">
+        <div class="band-photo">
+          <img src="assets/img/band-wide.jpg" alt="Dreamshade band" />
+        </div>
+        <div class="band-bio">
+          <h2>Band</h2>
+          <p>
+            DREAMSHADE is a modern metal band from Switzerland. This is a
+            placeholder bio: replace it with the actual text from the current
+            site (or an updated version) keeping it to a few short
+            paragraphs.
+          </p>
+          <p>
+            Use this space to mention albums, key tours, notable collaborations
+            and the general mood/attitude of the band.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT / SOCIAL -->
+    <section class="section" id="contact">
+      <div class="section-inner">
+        <h2>Contact & Booking</h2>
+        <!-- TODO: replace emails with the current ones from the site -->
+        <p>Booking: <a href="mailto:booking@example.com">booking@example.com</a></p>
+        <p>Management: <a href="mailto:management@example.com">management@example.com</a></p>
+
+        <div class="social-links">
+          <!-- Replace # with real links -->
+          <a href="#">Instagram</a>
+          <a href="#">Facebook</a>
+          <a href="#">YouTube</a>
+          <a href="#">TikTok</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>DREAMSHADE</span>
+      <span class="footer-copy">&copy; 2026</span>
+    </div>
+  </footer>
+
+  <script>
+    const navToggle = document.querySelector('.nav-toggle');
+    const mobileNav = document.getElementById('mobileNav');
+
+    if (navToggle && mobileNav) {
+      navToggle.addEventListener('click', () => {
+        mobileNav.classList.toggle('open');
+      });
+
+      mobileNav.addEventListener('click', (event) => {
+        if (event.target.tagName === 'A') {
+          mobileNav.classList.remove('open');
+        }
+      });
+    }
+  </script>
+</body>
+</html>
