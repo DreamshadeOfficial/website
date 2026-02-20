@@ -11,7 +11,7 @@ body {
 
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #05060a;
+  background: radial-gradient(circle at 20% 0, #101424, #05060a 60%);
   color: #f5f5f5;
   line-height: 1.5;
 }
@@ -35,8 +35,9 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   padding: 0 1.5rem;
-  background: linear-gradient(to bottom, rgba(5, 6, 10, 0.95), rgba(5, 6, 10, 0));
+  background: linear-gradient(to bottom, rgba(5, 6, 10, 0.96), rgba(5, 6, 10, 0));
   z-index: 20;
+  backdrop-filter: blur(10px);
 }
 
 .logo {
@@ -63,32 +64,48 @@ a:hover {
 
 .hero {
   position: relative;
-  min-height: 80vh;
+  min-height: 90vh;
   padding-top: 64px;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  text-align: center;
   color: #fff;
-  background: radial-gradient(circle at 20% 20%, #1b2035, #05060a 60%);
+  overflow: hidden;
 }
 
-.hero-overlay {
+.hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(5, 6, 10, 0.95));
-  pointer-events: none;
+  background: url("assets/img/hero-main.jpg") center center / cover no-repeat;
+  filter: grayscale(0.25) contrast(1.1) brightness(0.9);
+  transform: scale(1.08);
+}
+
+.hero-gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 0, rgba(58, 230, 255, 0.2), transparent 45%),
+    linear-gradient(to bottom right, rgba(5, 6, 10, 0.3), rgba(5, 6, 10, 0.97));
 }
 
 .hero-content {
   position: relative;
   z-index: 1;
-  max-width: 640px;
-  padding: 2rem 1.5rem 3rem;
+  max-width: 1200px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr);
+  gap: 2.8rem;
+  padding: 3rem 1.5rem 3.5rem;
+}
+
+.hero-main {
+  align-self: center;
 }
 
 .hero h1 {
-  font-size: clamp(2.4rem, 7vw, 3.5rem);
+  font-size: clamp(2.4rem, 7vw, 3.6rem);
   letter-spacing: 0.35em;
   text-transform: uppercase;
 }
@@ -98,14 +115,20 @@ a:hover {
   font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  opacity: 0.85;
+  opacity: 0.9;
+}
+
+.hero-sub {
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+  color: #d9ddf5;
+  max-width: 28rem;
 }
 
 .hero-buttons {
   margin-top: 2rem;
   display: flex;
   gap: 1rem;
-  justify-content: center;
   flex-wrap: wrap;
 }
 
@@ -130,6 +153,73 @@ a:hover {
   color: #3ae6ff;
 }
 
+.hero-album {
+  align-self: center;
+  justify-self: center;
+}
+
+.hero-album-inner {
+  width: min(320px, 100%);
+  aspect-ratio: 1 / 1;
+  border-radius: 24px;
+  background: url("assets/img/cover-rise.jpg") center center / cover no-repeat;
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-album-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(5, 6, 10, 0.6), transparent 40%);
+}
+
+.hero-album-meta {
+  position: relative;
+  margin-top: 1.2rem;
+  text-align: center;
+}
+
+.hero-album-meta h3 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.hero-album-meta span {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #bfc4e8;
+}
+
+.hero-platforms {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.9rem;
+}
+
+.hero-platforms a {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(5, 6, 10, 0.9);
+  border: 1px solid #30364d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-platforms img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
 main {
   padding-top: 64px;
 }
@@ -139,7 +229,7 @@ main {
 }
 
 .section-alt {
-  background: #0b0d13;
+  background: #05060e;
 }
 
 .section-inner {
@@ -167,18 +257,13 @@ main {
   width: 100%;
 }
 
-.cover-placeholder {
+.cover-art {
   width: 100%;
-  padding-top: 100%;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #161a2a, #252b42);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #b5bedc;
+  max-width: 340px;
+  border-radius: 22px;
+  aspect-ratio: 1 / 1;
+  background: url("assets/img/cover-rise.jpg") center center / cover no-repeat;
+  box-shadow: 0 28px 50px rgba(0, 0, 0, 0.85);
 }
 
 .release-info h3 {
@@ -278,18 +363,11 @@ main {
   align-items: center;
 }
 
-.band-photo-placeholder {
+.band-photo img {
   width: 100%;
-  padding-top: 60%;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #252b42, #171b2c);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: #c1c7e0;
+  border-radius: 22px;
+  display: block;
+  box-shadow: 0 26px 50px rgba(0, 0, 0, 0.7);
 }
 
 .band-bio p + p {
@@ -344,9 +422,27 @@ main {
 
 /* RESPONSIVE */
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .main-nav {
     display: none; /* semplice: nav nascosto su mobile; si può aggiungere un menu burger in futuro */
+  }
+
+  .hero-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .hero-main {
+    order: 1;
+  }
+
+  .hero-album {
+    order: 2;
+    margin-top: 2rem;
+  }
+
+  .hero-buttons {
+    justify-content: center;
   }
 
   .release-grid,
