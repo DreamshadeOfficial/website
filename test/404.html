@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dreamshade — Torniamo presto</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; }
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #f5f5f5;
+        background: radial-gradient(circle at 20% 0, #101424, #05060a 60%);
+      }
+
+      .hero {
+        position: relative;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url("assets/img/hero-main.jpg") center center / cover no-repeat;
+        filter: grayscale(0.25) contrast(1.1) brightness(0.75);
+        transform: scale(1.08);
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 10% 0, rgba(58, 230, 255, 0.22), transparent 45%),
+          linear-gradient(to bottom right, rgba(5, 6, 10, 0.45), rgba(5, 6, 10, 0.95));
+      }
+
+      .panel {
+        position: relative;
+        z-index: 1;
+        max-width: 860px;
+        border: 1px solid rgba(58, 230, 255, 0.35);
+        border-radius: 18px;
+        background: rgba(5, 6, 10, 0.55);
+        backdrop-filter: blur(6px);
+        padding: clamp(1.5rem, 3vw, 2.5rem);
+        box-shadow: 0 20px 60px rgba(0,0,0,.55);
+      }
+
+      .status {
+        color: #3ae6ff;
+        text-transform: uppercase;
+        letter-spacing: .22em;
+        font-size: .78rem;
+        margin-bottom: .9rem;
+      }
+
+      h1 {
+        text-transform: uppercase;
+        letter-spacing: .16em;
+        line-height: 1.25;
+        font-size: clamp(1.4rem, 4vw, 2.8rem);
+      }
+
+      p {
+        margin-top: 1rem;
+        color: #cfd4ea;
+        font-size: clamp(.95rem, 1.8vw, 1.1rem);
+      }
+
+      .home-link {
+        display: inline-block;
+        margin-top: 1.6rem;
+        padding: .7rem 1.3rem;
+        border-radius: 999px;
+        border: 1px solid #3ae6ff;
+        color: #3ae6ff;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        font-size: .78rem;
+      }
+
+      .home-link:hover { background: rgba(58,230,255,.12); }
+    </style>
+  </head>
+  <body>
+    <section class="hero" role="img" aria-label="Dreamshade in manutenzione">
+      <div class="panel">
+        <div class="status">Dreamshade Official</div>
+        <h1>Sito online per manutenzione<br />Torneremo presto</h1>
+        <p>Stiamo facendo aggiornamenti tecnici. Grazie per la pazienza.</p>
+        <a class="home-link" href="/">Torna alla home</a>
+      </div>
+    </section>
+  </body>
+</html>
