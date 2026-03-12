@@ -168,6 +168,21 @@ function saveCurrent(){
   Store.set('lbw_saved', saved.slice(0,40));
 }
 
+function initNav(){
+  const nav=document.querySelector('.nav');
+  const links=document.querySelector('.nav-links');
+  if(!nav||!links) return;
+  let btn=nav.querySelector('.nav-toggle');
+  if(!btn){
+    btn=document.createElement('button');
+    btn.className='nav-toggle';
+    btn.type='button';
+    btn.textContent='☰ Menu';
+    nav.insertBefore(btn, links);
+  }
+  btn.onclick=()=>links.classList.toggle('open');
+}
+
 window.LBW = {
   DB, Store,
   getUser, setUser,
@@ -178,5 +193,8 @@ window.LBW = {
   saveFavoritePlace, saveFavoriteRoute,
   removeFavoritePlace, removeFavoriteRoute,
   toggleFavoritePlace, toggleFavoriteRoute,
-  routeIdFromProposal
+  routeIdFromProposal,
+  initNav
 };
+
+document.addEventListener('DOMContentLoaded', initNav);
