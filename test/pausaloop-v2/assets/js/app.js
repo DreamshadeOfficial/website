@@ -3,16 +3,16 @@ const DB = {
   moods: ['Ho bisogno di aria', 'Voglio qualcosa di veloce', 'Voglio camminare di più', 'Oggi zero sbatti'],
   mealModes: ['Mangio fuori', 'Ho già la schiscetta'],
   restaurants: [
-    { id: 1, name: 'Green Fork', cuisine: 'Healthy', price: '$$', rating: 4.6, lat: 46.004, lng: 8.951, reserveUrl: 'https://example.com/reserve/green-fork', preorderUrl: 'https://example.com/preorder/green-fork' },
-    { id: 2, name: 'Pasta Nuova', cuisine: 'Italian', price: '$$', rating: 4.4, lat: 46.006, lng: 8.957, reserveUrl: 'https://example.com/reserve/pasta-nuova' },
-    { id: 3, name: 'Zen Bento', cuisine: 'Asian', price: '$', rating: 4.2, lat: 46.000, lng: 8.954, preorderUrl: 'https://example.com/preorder/zen-bento' },
-    { id: 4, name: 'Quick Salad', cuisine: 'Vegetarian', price: '$', rating: 4.1, lat: 46.002, lng: 8.959 },
-    { id: 5, name: 'Burger Loop', cuisine: 'Burger', price: '$$', rating: 4.0, lat: 46.007, lng: 8.949 }
+    { id: 1, name: 'Green Fork', cuisine: 'Healthy', price: '$$', rating: 4.6, reserveUrl: 'https://example.com/reserve/green-fork', preorderUrl: 'https://example.com/preorder/green-fork' },
+    { id: 2, name: 'Pasta Nuova', cuisine: 'Italian', price: '$$', rating: 4.4, reserveUrl: 'https://example.com/reserve/pasta-nuova' },
+    { id: 3, name: 'Zen Bento', cuisine: 'Asian', price: '$', rating: 4.2, preorderUrl: 'https://example.com/preorder/zen-bento' },
+    { id: 4, name: 'Quick Salad', cuisine: 'Vegetarian', price: '$', rating: 4.1 },
+    { id: 5, name: 'Burger Loop', cuisine: 'Burger', price: '$$', rating: 4.0 }
   ],
   schiscettaSpots: [
-    { id: 's1', name: 'Parco Ciani (panchina vista lago)', cuisine: 'Schiscetta spot', price: '-', rating: 4.7, lat: 46.003, lng: 8.954 },
-    { id: 's2', name: 'Piazzetta tranquilla centro', cuisine: 'Schiscetta spot', price: '-', rating: 4.3, lat: 46.005, lng: 8.952 },
-    { id: 's3', name: 'Area verde uffici nord', cuisine: 'Schiscetta spot', price: '-', rating: 4.1, lat: 46.004, lng: 8.949 }
+    { id: 's1', name: 'Panchina ombreggiata di zona', cuisine: 'Schiscetta spot', price: '-', rating: 4.7 },
+    { id: 's2', name: 'Piazzetta tranquilla di quartiere', cuisine: 'Schiscetta spot', price: '-', rating: 4.3 },
+    { id: 's3', name: 'Area verde vicino ufficio', cuisine: 'Schiscetta spot', price: '-', rating: 4.1 }
   ]
 };
 
@@ -79,6 +79,21 @@ function buildWalkingLoop(origin, destination, walkMinutes, intensity){
     wp3,
     { lat: origin.lat, lng: origin.lng }
   ];
+}
+
+function localizeTemplatesAround(origin, templates){
+  const offsets = [
+    { n: 280, e: 120 },
+    { n: 120, e: 320 },
+    { n: -180, e: 260 },
+    { n: 240, e: -220 },
+    { n: -260, e: -140 }
+  ];
+  return templates.map((t, i) => {
+    const o = offsets[i % offsets.length];
+    const p = movePoint(origin.lat, origin.lng, o.n, o.e);
+    return { ...t, lat: p.lat, lng: p.lng };
+  });
 }
 
 function routeIdFromProposal(proposal){
@@ -155,17 +170,12 @@ function buildProposal(){
   const walkKm = +(speed*(p.walkMinutes/60)).toFixed(1);
   const eatMinutes = Math.max(15, p.breakMinutes - p.walkMinutes - 5);
 
-  const baseCenter = { lat: 46.0037, lng: 8.9511 }; // vecchio centro mock (Lugano)
-  const latShift = (p.location?.lat ?? baseCenter.lat) - baseCenter.lat;
-  const lngShift = (p.location?.lng ?? baseCenter.lng) - baseCenter.lng;
-  const localize = (x) => ({ ...x, lat: x.lat + latShift, lng: x.lng + lngShift });
-
   let pool = [];
   if (p.mealMode === 'Ho già la schiscetta') {
-    pool = DB.schiscettaSpots.map(localize);
+    pool = localizeTemplatesAround(p.location, DB.schiscettaSpots);
   } else {
     const filtered = DB.restaurants.filter(r => !p.cuisine || r.cuisine === p.cuisine);
-    pool = (filtered.length ? filtered : DB.restaurants).map(localize);
+    pool = localizeTemplatesAround(p.location, filtered.length ? filtered : DB.restaurants);
   }
 
   const candidates = pool
