@@ -42,3 +42,4 @@ label{font-size:.9rem;color:var(--muted)}
   .nav-links{display:none;flex-direction:column;width:100%;margin-top:8px}
   .nav-links.open{display:flex}
 }
+
