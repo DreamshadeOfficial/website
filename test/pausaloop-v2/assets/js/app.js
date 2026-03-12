@@ -1,12 +1,18 @@
 const DB = {
   cuisines: ['Italian', 'Asian', 'Burger', 'Healthy', 'Vegetarian', 'Sushi'],
   moods: ['Ho bisogno di aria', 'Voglio qualcosa di veloce', 'Voglio camminare di più', 'Oggi zero sbatti'],
+  mealModes: ['Mangio fuori', 'Ho già la schiscetta'],
   restaurants: [
-    { id: 1, name: 'Green Fork', cuisine: 'Healthy', price: '$$', rating: 4.6, lat: 46.004, lng: 8.951 },
-    { id: 2, name: 'Pasta Nuova', cuisine: 'Italian', price: '$$', rating: 4.4, lat: 46.006, lng: 8.957 },
-    { id: 3, name: 'Zen Bento', cuisine: 'Asian', price: '$', rating: 4.2, lat: 46.000, lng: 8.954 },
+    { id: 1, name: 'Green Fork', cuisine: 'Healthy', price: '$$', rating: 4.6, lat: 46.004, lng: 8.951, reserveUrl: 'https://example.com/reserve/green-fork', preorderUrl: 'https://example.com/preorder/green-fork' },
+    { id: 2, name: 'Pasta Nuova', cuisine: 'Italian', price: '$$', rating: 4.4, lat: 46.006, lng: 8.957, reserveUrl: 'https://example.com/reserve/pasta-nuova' },
+    { id: 3, name: 'Zen Bento', cuisine: 'Asian', price: '$', rating: 4.2, lat: 46.000, lng: 8.954, preorderUrl: 'https://example.com/preorder/zen-bento' },
     { id: 4, name: 'Quick Salad', cuisine: 'Vegetarian', price: '$', rating: 4.1, lat: 46.002, lng: 8.959 },
     { id: 5, name: 'Burger Loop', cuisine: 'Burger', price: '$$', rating: 4.0, lat: 46.007, lng: 8.949 }
+  ],
+  schiscettaSpots: [
+    { id: 's1', name: 'Parco Ciani (panchina vista lago)', cuisine: 'Schiscetta spot', price: '-', rating: 4.7, lat: 46.003, lng: 8.954 },
+    { id: 's2', name: 'Piazzetta tranquilla centro', cuisine: 'Schiscetta spot', price: '-', rating: 4.3, lat: 46.005, lng: 8.952 },
+    { id: 's3', name: 'Area verde uffici nord', cuisine: 'Schiscetta spot', price: '-', rating: 4.1, lat: 46.004, lng: 8.949 }
   ]
 };
 
@@ -19,7 +25,15 @@ function getUser(){ return Store.get('lbw_user', null); }
 function setUser(user){ Store.set('lbw_user', user); }
 function getPrefs(){
   return Store.get('lbw_prefs', {
-    breakMinutes: 45, walkMinutes: 20, budget: '$$', cuisine: 'Italian', diet: 'none', intensity: 'rilassata', goal: 'staccare', mood: 'Oggi zero sbatti',
+    breakMinutes: 45,
+    walkMinutes: 20,
+    budget: '$$',
+    cuisine: 'Italian',
+    diet: 'none',
+    intensity: 'rilassata',
+    goal: 'staccare',
+    mood: 'Oggi zero sbatti',
+    mealMode: 'Mangio fuori',
     location: { label: 'Lugano Centro', lat: 46.0037, lng: 8.9511 }
   });
 }
@@ -33,6 +47,31 @@ function haversine(a,b){
   return 2*R*Math.asin(Math.sqrt(s));
 }
 
+function saveFavoritePlace(place){
+  const fav = Store.get('lbw_fav_places', []);
+  if (!fav.find(x => String(x.id) === String(place.id))) {
+    fav.unshift({ ...place, savedAt: new Date().toISOString() });
+    Store.set('lbw_fav_places', fav.slice(0,100));
+  }
+}
+
+function saveFavoriteRoute(proposal){
+  const routes = Store.get('lbw_fav_routes', []);
+  routes.unshift({
+    savedAt: new Date().toISOString(),
+    walk: proposal.walk,
+    route: proposal.route,
+    destination: proposal.food?.name || 'Percorso pausa'
+  });
+  Store.set('lbw_fav_routes', routes.slice(0,100));
+}
+
+function addHistory(proposal){
+  const hist = Store.get('lbw_history', []);
+  hist.unshift(proposal);
+  Store.set('lbw_history', hist.slice(0,60));
+}
+
 function buildProposal(){
   const p = getPrefs();
   const now = new Date();
@@ -40,10 +79,16 @@ function buildProposal(){
   const walkKm = +(speed*(p.walkMinutes/60)).toFixed(1);
   const eatMinutes = Math.max(15, p.breakMinutes - p.walkMinutes - 5);
 
-  let candidates = DB.restaurants.filter(r => !p.cuisine || r.cuisine === p.cuisine);
-  if (!candidates.length) candidates = DB.restaurants;
+  let pool = [];
+  if (p.mealMode === 'Ho già la schiscetta') {
+    pool = DB.schiscettaSpots;
+  } else {
+    pool = DB.restaurants.filter(r => !p.cuisine || r.cuisine === p.cuisine);
+    if (!pool.length) pool = DB.restaurants;
+  }
 
-  candidates = candidates.map(r => ({...r, distance: haversine(p.location, r)}))
+  const candidates = pool
+    .map(r => ({...r, distance: haversine(p.location, r)}))
     .sort((a,b)=> a.distance-b.distance || b.rating-a.rating);
 
   const pick = candidates[0];
@@ -60,26 +105,32 @@ function buildProposal(){
   const proposal = {
     createdAt: now.toISOString(),
     walk: { minutes: p.walkMinutes, distanceKm: walkKm, type: `${p.intensity} • semi-anello` },
-    food: { ...pick, etaEatMin: eatMinutes },
+    food: { ...pick, etaEatMin: eatMinutes, mealMode: p.mealMode },
     alternatives: alts,
     route: loop
   };
 
   Store.set('lbw_today', proposal);
+  addHistory(proposal);
   return proposal;
 }
 
 function getProposal(){ return Store.get('lbw_today', null) || buildProposal(); }
+
 function saveCurrent(){
-  const saved = Store.get('lbw_saved', []);
   const pr = getProposal();
+  saveFavoritePlace(pr.food);
+  saveFavoriteRoute(pr);
+  const saved = Store.get('lbw_saved', []);
   saved.unshift({ when: new Date().toISOString(), proposal: pr });
   Store.set('lbw_saved', saved.slice(0,40));
 }
-function pushHistory(){
-  const hist = Store.get('lbw_history', []);
-  hist.unshift(getProposal());
-  Store.set('lbw_history', hist.slice(0,60));
-}
 
-window.LBW = { DB, Store, getUser, setUser, getPrefs, setPrefs, getProposal, buildProposal, saveCurrent, pushHistory };
+window.LBW = {
+  DB, Store,
+  getUser, setUser,
+  getPrefs, setPrefs,
+  getProposal, buildProposal,
+  saveCurrent,
+  saveFavoritePlace, saveFavoriteRoute
+};
