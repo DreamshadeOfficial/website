@@ -172,6 +172,13 @@ function initNav(){
   const nav=document.querySelector('.nav');
   const links=document.querySelector('.nav-links');
   if(!nav||!links) return;
+
+  const brand = nav.querySelector('.brand');
+  if (brand) {
+    brand.style.cursor = 'pointer';
+    brand.onclick = () => { window.location.href = 'dashboard.html'; };
+  }
+
   let btn=nav.querySelector('.nav-toggle');
   if(!btn){
     btn=document.createElement('button');
