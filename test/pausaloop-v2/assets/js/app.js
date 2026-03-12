@@ -47,6 +47,40 @@ function haversine(a,b){
   return 2*R*Math.asin(Math.sqrt(s));
 }
 
+function movePoint(lat, lng, metersNorth, metersEast){
+  const dLat = metersNorth / 111320;
+  const dLng = metersEast / (111320 * Math.cos(lat * Math.PI / 180));
+  return { lat: lat + dLat, lng: lng + dLng };
+}
+
+function buildWalkingLoop(origin, destination, walkMinutes, intensity){
+  const paceMpm = intensity === 'dinamica' ? 95 : intensity === 'media' ? 80 : 65;
+  const totalMeters = Math.max(600, Math.round(walkMinutes * paceMpm));
+  const sideMeters = Math.max(120, Math.round(totalMeters * 0.22));
+  const forwardMeters = Math.max(180, Math.round(totalMeters * 0.28));
+
+  const toDest = {
+    n: (destination.lat - origin.lat) * 111320,
+    e: (destination.lng - origin.lng) * (111320 * Math.cos(origin.lat * Math.PI / 180))
+  };
+  const len = Math.max(1, Math.hypot(toDest.n, toDest.e));
+  const dir = { n: toDest.n / len, e: toDest.e / len };
+  const perp = { n: -dir.e, e: dir.n };
+
+  const wp1 = movePoint(origin.lat, origin.lng, dir.n * forwardMeters + perp.n * sideMeters, dir.e * forwardMeters + perp.e * sideMeters);
+  const wp2 = movePoint(destination.lat, destination.lng, perp.n * (sideMeters * 0.6), perp.e * (sideMeters * 0.6));
+  const wp3 = movePoint(origin.lat, origin.lng, dir.n * (forwardMeters * 0.6) - perp.n * sideMeters, dir.e * (forwardMeters * 0.6) - perp.e * sideMeters);
+
+  return [
+    { lat: origin.lat, lng: origin.lng },
+    wp1,
+    { lat: destination.lat, lng: destination.lng },
+    wp2,
+    wp3,
+    { lat: origin.lat, lng: origin.lng }
+  ];
+}
+
 function routeIdFromProposal(proposal){
   const f = proposal?.food || {};
   const w = proposal?.walk || {};
@@ -136,13 +170,12 @@ function buildProposal(){
   const pick = candidates[0];
   const alts = candidates.slice(1,4);
 
-  const loop = [
+  const loop = buildWalkingLoop(
     { lat: p.location.lat, lng: p.location.lng },
-    { lat: p.location.lat + 0.0025, lng: p.location.lng + 0.002 },
     { lat: pick.lat, lng: pick.lng },
-    { lat: p.location.lat + 0.0015, lng: p.location.lng - 0.0018 },
-    { lat: p.location.lat, lng: p.location.lng }
-  ];
+    p.walkMinutes,
+    p.intensity
+  );
 
   const proposal = {
     createdAt: now.toISOString(),
