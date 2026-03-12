@@ -155,12 +155,17 @@ function buildProposal(){
   const walkKm = +(speed*(p.walkMinutes/60)).toFixed(1);
   const eatMinutes = Math.max(15, p.breakMinutes - p.walkMinutes - 5);
 
+  const baseCenter = { lat: 46.0037, lng: 8.9511 }; // vecchio centro mock (Lugano)
+  const latShift = (p.location?.lat ?? baseCenter.lat) - baseCenter.lat;
+  const lngShift = (p.location?.lng ?? baseCenter.lng) - baseCenter.lng;
+  const localize = (x) => ({ ...x, lat: x.lat + latShift, lng: x.lng + lngShift });
+
   let pool = [];
   if (p.mealMode === 'Ho già la schiscetta') {
-    pool = DB.schiscettaSpots;
+    pool = DB.schiscettaSpots.map(localize);
   } else {
-    pool = DB.restaurants.filter(r => !p.cuisine || r.cuisine === p.cuisine);
-    if (!pool.length) pool = DB.restaurants;
+    const filtered = DB.restaurants.filter(r => !p.cuisine || r.cuisine === p.cuisine);
+    pool = (filtered.length ? filtered : DB.restaurants).map(localize);
   }
 
   const candidates = pool
