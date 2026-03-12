@@ -47,6 +47,23 @@ function haversine(a,b){
   return 2*R*Math.asin(Math.sqrt(s));
 }
 
+function routeIdFromProposal(proposal){
+  const f = proposal?.food || {};
+  const w = proposal?.walk || {};
+  return `${String(f.id||f.name||'x')}-${String(w.minutes||0)}-${String(w.distanceKm||0)}`;
+}
+
+function isFavoritePlace(place){
+  const fav = Store.get('lbw_fav_places', []);
+  return fav.some(x => String(x.id) === String(place.id));
+}
+
+function isFavoriteRoute(proposal){
+  const id = routeIdFromProposal(proposal);
+  const routes = Store.get('lbw_fav_routes', []);
+  return routes.some(x => String(x.routeId) === id);
+}
+
 function saveFavoritePlace(place){
   const fav = Store.get('lbw_fav_places', []);
   if (!fav.find(x => String(x.id) === String(place.id))) {
@@ -55,15 +72,40 @@ function saveFavoritePlace(place){
   }
 }
 
+function removeFavoritePlace(place){
+  const fav = Store.get('lbw_fav_places', []);
+  Store.set('lbw_fav_places', fav.filter(x => String(x.id) !== String(place.id)));
+}
+
+function toggleFavoritePlace(place){
+  if (isFavoritePlace(place)) removeFavoritePlace(place); else saveFavoritePlace(place);
+  return isFavoritePlace(place);
+}
+
 function saveFavoriteRoute(proposal){
   const routes = Store.get('lbw_fav_routes', []);
-  routes.unshift({
-    savedAt: new Date().toISOString(),
-    walk: proposal.walk,
-    route: proposal.route,
-    destination: proposal.food?.name || 'Percorso pausa'
-  });
-  Store.set('lbw_fav_routes', routes.slice(0,100));
+  const routeId = routeIdFromProposal(proposal);
+  if (!routes.find(x => String(x.routeId) === routeId)) {
+    routes.unshift({
+      routeId,
+      savedAt: new Date().toISOString(),
+      walk: proposal.walk,
+      route: proposal.route,
+      destination: proposal.food?.name || 'Percorso pausa'
+    });
+    Store.set('lbw_fav_routes', routes.slice(0,100));
+  }
+}
+
+function removeFavoriteRoute(proposal){
+  const routes = Store.get('lbw_fav_routes', []);
+  const routeId = routeIdFromProposal(proposal);
+  Store.set('lbw_fav_routes', routes.filter(x => String(x.routeId) !== routeId));
+}
+
+function toggleFavoriteRoute(proposal){
+  if (isFavoriteRoute(proposal)) removeFavoriteRoute(proposal); else saveFavoriteRoute(proposal);
+  return isFavoriteRoute(proposal);
 }
 
 function addHistory(proposal){
@@ -132,5 +174,9 @@ window.LBW = {
   getPrefs, setPrefs,
   getProposal, buildProposal,
   saveCurrent,
-  saveFavoritePlace, saveFavoriteRoute
+  isFavoritePlace, isFavoriteRoute,
+  saveFavoritePlace, saveFavoriteRoute,
+  removeFavoritePlace, removeFavoriteRoute,
+  toggleFavoritePlace, toggleFavoriteRoute,
+  routeIdFromProposal
 };
