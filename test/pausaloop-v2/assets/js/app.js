@@ -294,13 +294,19 @@ function buildProposal(){
     food: { ...pick, etaEatMin: eatMinutes, mealMode: p.mealMode },
     alternatives: alts,
     route: loop,
-    meta: { source: 'synthetic' }
+    source: 'synthetic'
   };
 
   return finalizeProposal(proposal);
 }
 
-function getProposal(){ return Store.get('lbw_today', null) || buildProposal(); }
+function getProposal(){
+  const current = Store.get('lbw_today', null);
+  if (current && ROUTES_POC?.routes?.length && current.source !== 'poc') {
+    return buildProposal();
+  }
+  return current || buildProposal();
+}
 
 function saveCurrent(){
   const pr = getProposal();
