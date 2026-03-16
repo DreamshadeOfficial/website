@@ -138,6 +138,20 @@ function buildGeoLoopFromCoordinates(geometry){
   return [...forward, ...back];
 }
 
+function getNumericStore(key, fallback = 0){
+  const val = Store.get(key, null);
+  return typeof val === 'number' ? val : fallback;
+}
+
+function scheduleNextRealRoute(){
+  if(!ROUTES_POC?.routes?.length) return false;
+  const total = ROUTES_POC.routes.length;
+  const idx = getNumericStore('lbw_poc_next', 0) % total;
+  Store.set('lbw_poc_force', idx);
+  Store.set('lbw_poc_next', (idx + 1) % total);
+  return true;
+}
+
 function pickPocRoutes(prefs){
   if(!ROUTES_POC?.routes?.length) return null;
   const enriched = ROUTES_POC.routes.map((r) => {
@@ -148,13 +162,17 @@ function pickPocRoutes(prefs){
     };
   }).sort((a,b)=>a.dist-b.dist);
   if(!enriched.length) return null;
+  const forcedIdx = Store.get('lbw_poc_force', null);
+  const mainIdx = (typeof forcedIdx === 'number' && enriched[forcedIdx]) ? forcedIdx : 0;
+  if (typeof forcedIdx === 'number') Store.set('lbw_poc_force', null);
   return {
-    main: enriched[0].raw,
-    alternatives: enriched.slice(1,4).map(x=>x.raw)
+    main: enriched[mainIdx].raw,
+    alternatives: enriched.filter((_,i)=>i!==mainIdx).slice(0,4).map(x=>x.raw)
   };
 }
 
 function buildProposalFromPoc(prefs){
+  if (prefs.mealMode === 'Ho già la schiscetta') return null;
   const pick = pickPocRoutes(prefs);
   if(!pick) return null;
   const main = pick.main;
@@ -350,6 +368,7 @@ window.LBW = {
   removeFavoritePlace, removeFavoriteRoute,
   toggleFavoritePlace, toggleFavoriteRoute,
   routeIdFromProposal,
+  scheduleNextRealRoute,
   initNav
 };
 
