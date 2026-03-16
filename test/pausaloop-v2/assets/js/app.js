@@ -16,6 +16,8 @@ const DB = {
   ]
 };
 
+const ROUTES_POC = (typeof window !== 'undefined' && window.WALK2EAT_POC_ROUTES) ? window.WALK2EAT_POC_ROUTES : null;
+
 const Store = {
   get(key, fallback){ try{return JSON.parse(localStorage.getItem(key)) ?? fallback;}catch{return fallback;} },
   set(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
@@ -102,6 +104,97 @@ function routeIdFromProposal(proposal){
   return `${String(f.id||f.name||'x')}-${String(w.minutes||0)}-${String(w.distanceKm||0)}`;
 }
 
+function formatCuisineTag(value){
+  if(!value) return '';
+  return value.split(/[;,]/).map(v => v.trim()).filter(Boolean).map(v => v.charAt(0).toUpperCase()+v.slice(1)).join(' / ');
+}
+
+function poiToPlace(poi = {}, distanceKm){
+  const cuisine = formatCuisineTag(poi.cuisine || poi.tags?.cuisine);
+  const addressParts = [];
+  if (poi.tags?.['addr:street']) addressParts.push(poi.tags['addr:street']);
+  if (poi.tags?.['addr:housenumber']) addressParts.push(poi.tags['addr:housenumber']);
+  if (poi.tags?.['addr:city']) addressParts.push(poi.tags['addr:city']);
+  return {
+    id: `poi-${poi.id}`,
+    name: poi.name || 'Spot pausa',
+    cuisine: cuisine || poi.amenity || 'Food spot',
+    price: poi.tags?.price || '$$',
+    rating: poi.tags?.rating ? Number(poi.tags.rating) : undefined,
+    reserveUrl: poi.tags?.website || null,
+    website: poi.tags?.website || null,
+    phone: poi.tags?.phone || null,
+    address: addressParts.join(', '),
+    lat: poi.lat,
+    lng: poi.lon,
+    distance: typeof distanceKm === 'number' ? distanceKm : undefined
+  };
+}
+
+function buildGeoLoopFromCoordinates(geometry){
+  if(!geometry?.coordinates?.length) return null;
+  const forward = geometry.coordinates.map(([lng, lat]) => ({ lat, lng }));
+  const back = forward.slice(0, -1).reverse();
+  return [...forward, ...back];
+}
+
+function pickPocRoutes(prefs){
+  if(!ROUTES_POC?.routes?.length) return null;
+  const enriched = ROUTES_POC.routes.map((r) => {
+    const poi = r.poi || {};
+    return {
+      raw: r,
+      dist: haversine(prefs.location, { lat: poi.lat, lng: poi.lon })
+    };
+  }).sort((a,b)=>a.dist-b.dist);
+  if(!enriched.length) return null;
+  return {
+    main: enriched[0].raw,
+    alternatives: enriched.slice(1,4).map(x=>x.raw)
+  };
+}
+
+function buildProposalFromPoc(prefs){
+  const pick = pickPocRoutes(prefs);
+  if(!pick) return null;
+  const main = pick.main;
+  const walkMinutes = Math.max(10, Math.round((main.duration_min || prefs.walkMinutes) * 2));
+  const walkDistanceKm = +( ((main.distance_m || 0) * 2) / 1000 ).toFixed(2);
+  const eatMinutes = Math.max(15, prefs.breakMinutes - walkMinutes - 5);
+  const routeLine = buildGeoLoopFromCoordinates(main.geometry) || buildWalkingLoop(
+    { lat: prefs.location.lat, lng: prefs.location.lng },
+    { lat: main.poi.lat, lng: main.poi.lon },
+    prefs.walkMinutes,
+    prefs.intensity
+  );
+
+  const foodPlace = poiToPlace(main.poi, main.distance_m ? +(main.distance_m/1000).toFixed(2) : undefined);
+  foodPlace.mealMode = prefs.mealMode;
+  foodPlace.etaEatMin = eatMinutes;
+
+  const alternatives = pick.alternatives.map((alt)=>{
+    const place = poiToPlace(alt.poi, alt.distance_m ? +(alt.distance_m/1000).toFixed(2) : undefined);
+    return place;
+  });
+
+  const fallbackDistanceKm = +( (prefs.walkMinutes * 80) / 1000 ).toFixed(2);
+
+  return {
+    createdAt: new Date().toISOString(),
+    walk: { minutes: walkMinutes, distanceKm: walkDistanceKm || fallbackDistanceKm, type: 'reale • OSRM' },
+    food: foodPlace,
+    alternatives,
+    route: routeLine,
+    source: 'poc'
+  };
+}
+
+function finalizeProposal(proposal){
+  Store.set('lbw_today', proposal);
+  addHistory(proposal);
+  return proposal;
+}
+
 function isFavoritePlace(place){
   const fav = Store.get('lbw_fav_places', []);
   return fav.some(x => String(x.id) === String(place.id));
@@ -165,6 +258,9 @@ function addHistory(proposal){
 
 function buildProposal(){
   const p = getPrefs();
+  const pocProposal = buildProposalFromPoc(p);
+  if (pocProposal) return finalizeProposal(pocProposal);
+
   const now = new Date();
   const speed = p.intensity === 'dinamica' ? 5.5 : p.intensity === 'media' ? 4.7 : 4.0;
   const walkKm = +(speed*(p.walkMinutes/60)).toFixed(1);
@@ -197,12 +293,11 @@ function buildProposal(){
     walk: { minutes: p.walkMinutes, distanceKm: walkKm, type: `${p.intensity} • semi-anello` },
     food: { ...pick, etaEatMin: eatMinutes, mealMode: p.mealMode },
     alternatives: alts,
-    route: loop
+    route: loop,
+    meta: { source: 'synthetic' }
   };
 
-  Store.set('lbw_today', proposal);
-  addHistory(proposal);
-  return proposal;
+  return finalizeProposal(proposal);
 }
 
 function getProposal(){ return Store.get('lbw_today', null) || buildProposal(); }
