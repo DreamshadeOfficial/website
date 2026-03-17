@@ -459,8 +459,14 @@ async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity, dirIdxO
 // --- Proposal walk-only asincrona (nessun ristorante) ---
 async function buildWalkOnlyProposalAsync(prefsOverride, forceNewDir) {
   var p = prefsOverride || getPrefs();
-  var gpsPos = await getGPSPosition(5000);
-  var origin = gpsPos || { lat: p.location.lat, lng: p.location.lng };
+  // Usa GPS solo se l'utente ha scelto "Posizione attuale", altrimenti usa l'indirizzo salvato
+  var origin;
+  if (p.location && p.location.label === 'Posizione attuale') {
+    var gpsPos = await getGPSPosition(5000);
+    origin = gpsPos || { lat: p.location.lat, lng: p.location.lng };
+  } else {
+    origin = { lat: p.location.lat, lng: p.location.lng };
+  }
 
   var dirIdx = forceNewDir ? getNextWalkDir() : peekWalkDir();
   var loopResult = await buildWalkingLoopRealAsync(origin, p.walkMinutes, p.intensity, dirIdx);
