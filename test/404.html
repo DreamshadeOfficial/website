@@ -74,9 +74,19 @@
         font-size: clamp(.95rem, 1.8vw, 1.1rem);
       }
 
-      .home-link {
-        display: inline-block;
+      .cta-group {
         margin-top: 1.6rem;
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: .8rem;
+        justify-content: center;
+      }
+
+      .home-link,
+      .social-link {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
         padding: .7rem 1.3rem;
         border-radius: 999px;
         border: 1px solid #3ae6ff;
@@ -85,9 +95,22 @@
         text-transform: uppercase;
         letter-spacing: .12em;
         font-size: .78rem;
+        transition: background .2s ease, color .2s ease, border-color .2s ease;
       }
 
-      .home-link:hover { background: rgba(58,230,255,.12); }
+      .home-link:hover,
+      .social-link:hover {
+        background: rgba(58,230,255,.12);
+      }
+
+      .social-link {
+        border-color: rgba(249, 90, 152, 0.8);
+        color: rgba(249, 90, 152, 0.95);
+      }
+
+      .social-link:hover {
+        background: rgba(249, 90, 152, 0.14);
+      }
     </style>
   </head>
   <body>
@@ -97,7 +120,17 @@
         <h1>Site under maintenance<br />We’ll be back soon</h1>
         <p>We’re making technical updates. Thanks for your patience.</p>
         <p style="margin-top:1.2rem;font-weight:600;color:#f9fafc;letter-spacing:.08em;">CIAONE dal quartier generale Dreamshade 🤘</p>
-        <a class="home-link" href="/">Back to home</a>
+        <div class="cta-group">
+          <a class="home-link" href="/">Back to home</a>
+          <a
+            class="social-link"
+            href="https://www.instagram.com/dreamshadeband/"
+            target="_blank"
+            rel="noopener"
+          >
+            Instagram @dreamshadeband
+          </a>
+        </div>
       </div>
     </section>
   </body>
