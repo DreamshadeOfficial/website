@@ -402,24 +402,25 @@ async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity, dirIdxO
     var angleRad = (WALK_DIRECTIONS[dirIdx] * Math.PI) / 180;
     var turnaround = movePoint(origin.lat, origin.lng, halfMeters * Math.cos(angleRad), halfMeters * Math.sin(angleRad));
     try {
-      var base = 'https://router.project-osrm.org/route/v1/foot';
+      // routing.openstreetmap.de/routed-foot: profilo pedone corretto, durate reali, nessuna API key
+      var base = 'https://routing.openstreetmap.de/routed-foot/route/v1/driving';
       var outUrl = base + '/' + origin.lng + ',' + origin.lat + ';' + turnaround.lng + ',' + turnaround.lat + '?overview=full&geometries=geojson';
       var retUrl = base + '/' + turnaround.lng + ',' + turnaround.lat + ';' + origin.lng + ',' + origin.lat + '?overview=full&geometries=geojson';
       var resps = await Promise.all([fetch(outUrl), fetch(retUrl)]);
       var datas = await Promise.all(resps.map(function(r) { return r.json(); }));
       var outRoute = datas[0].routes && datas[0].routes[0];
       var retRoute = datas[1].routes && datas[1].routes[0];
-      if (!outRoute || !retRoute) { console.warn('OSRM dir ' + dirIdx + ': nessun percorso'); continue; }
+      if (!outRoute || !retRoute) { console.warn('OSM-foot dir ' + dirIdx + ': nessun percorso'); continue; }
       var totalMeters = outRoute.distance + retRoute.distance;
       if (totalMeters > maxTotalMeters) {
-        console.warn('OSRM dir ' + dirIdx + ': percorso troppo lungo (' + Math.round(totalMeters/1000) + ' km), provo altra direzione');
+        console.warn('OSM-foot dir ' + dirIdx + ': percorso troppo lungo (' + Math.round(totalMeters/1000) + ' km), provo altra direzione');
         continue;
       }
       var outPts = outRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
       var retPts = retRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
       var totalDist = +((totalMeters) / 1000).toFixed(2);
-      // OSRM pubblico usa velocità auto per la durata → calcoliamo noi da distanza reale a 5 km/h (83 m/min)
-      var totalMin = Math.round(totalMeters / 83);
+      // Durata dal server pedone (secondi → minuti), arrotondata
+      var totalMin = Math.round((outRoute.duration + retRoute.duration) / 60);
       return {
         route: outPts.concat(retPts.slice(1)),
         turnaround: outPts[outPts.length - 1],
