@@ -1,17 +1,164 @@
-<!doctype html><html lang='it'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Mappa percorso</title><link rel='stylesheet' href='assets/css/styles.css'><link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'><script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script></head><body><div class='container'><div class='nav'><div class='brand'><img class='brand-logo' src='assets/branding-hq/walk2eat-navbar-dark-128.png' alt='Walk2Eat logo' /><span class="brand-text">Walk<span class="brand-two">2</span>Eat</span></div><div class='nav-links'><a class='btn secondary' href='dashboard.html'>La tua pausa</a><a class='btn ghost' href='favorites.html'>Preferiti</a><a class='btn ghost' href='preferences.html'>Preferenze</a></div></div><div class='card'><h2>Percorso consigliato</h2><div id='map' class='map-box'></div><p class='small' id='meta'></p></div></div><script src='assets/js/routes-poc-data.js'></script>
-<script src='assets/js/app.js'></script><script>const p=LBW.getProposal();meta.textContent=`${p.walk.minutes} min • ${p.walk.distanceKm} km • destinazione ${p.food.name}`;const map=L.map('map');L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);const pts=p.route.map(x=>[x.lat,x.lng]);L.polyline(pts,{color:'#22c55e',weight:4}).addTo(map);L.marker(pts[0]).addTo(map).bindPopup('Partenza ufficio');L.marker(pts[2]).addTo(map).bindPopup(p.food.name);map.fitBounds(L.latLngBounds(pts),{padding:[20,20]});</script></body></html>
+<!doctype html>
+<html lang='it'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <title>Mappa percorso</title>
+  <link rel='stylesheet' href='assets/css/styles.css'>
+  <link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'>
+  <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>
+  <style>
+    .map-box { height: 60vh; min-height: 300px; border-radius: 12px; overflow: hidden; }
+    .loading-overlay {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 60vh; min-height: 300px; border-radius: 12px;
+      background: var(--bg-card, #1a1a2e); color: var(--text-secondary, #aaa);
+      font-size: 1rem; gap: 12px;
+    }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid rgba(34,197,94,0.2);
+      border-top-color: #22c55e; border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .walk-meta { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+    .walk-badge {
+      background: rgba(34,197,94,0.12); color: #22c55e;
+      padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;
+    }
+    .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .error-msg { color: #f87171; font-size: 0.9rem; margin-top: 8px; }
+  </style>
+</head>
+<body>
+<div class='container'>
+  <div class='nav'>
+    <div class='brand'>
+      <img class='brand-logo' src='assets/branding-hq/walk2eat-navbar-dark-128.png' alt='Walk2Eat logo' />
+      <span class="brand-text">Walk<span class="brand-two">2</span>Eat</span>
+    </div>
+    <div class='nav-links'>
+      <a class='btn secondary' href='dashboard.html'>La tua pausa</a>
+      <a class='btn ghost' href='favorites.html'>Preferiti</a>
+      <a class='btn ghost' href='preferences.html'>Preferenze</a>
+    </div>
+  </div>
 
+  <div class='card'>
+    <h2>🚶 Percorso passeggiata</h2>
 
+    <!-- Loading state -->
+    <div id='loadingBox' class='loading-overlay'>
+      <div class='spinner'></div>
+      <span id='loadingMsg'>Ricerca posizione GPS…</span>
+    </div>
 
+    <!-- Mappa (nascosta durante caricamento) -->
+    <div id='map' class='map-box' style='display:none'></div>
 
+    <div id='metaBox' style='display:none'>
+      <div class='walk-meta' id='walkBadges'></div>
+      <p class='small' id='sourceNote' style='margin-top:8px; color: var(--text-secondary,#888);'></p>
+      <p class='error-msg' id='errorMsg' style='display:none'></p>
+      <div class='btn-row'>
+        <button class='btn primary' id='btnRefresh'>🔄 Nuovo percorso</button>
+        <a class='btn secondary' href='dashboard.html'>← La tua pausa</a>
+      </div>
+    </div>
+  </div>
+</div>
 
+<script src='assets/js/routes-poc-data.js'></script>
+<script src='assets/js/app.js'></script>
+<script>
+(function() {
+  var mapInstance = null;
 
+  function setLoading(msg) {
+    document.getElementById('loadingBox').style.display = 'flex';
+    document.getElementById('map').style.display = 'none';
+    document.getElementById('metaBox').style.display = 'none';
+    document.getElementById('loadingMsg').textContent = msg || 'Caricamento…';
+  }
 
+  function setError(msg) {
+    document.getElementById('loadingBox').style.display = 'none';
+    document.getElementById('map').style.display = 'none';
+    document.getElementById('metaBox').style.display = 'block';
+    var e = document.getElementById('errorMsg');
+    e.textContent = msg;
+    e.style.display = 'block';
+  }
 
+  function renderMap(proposal) {
+    document.getElementById('loadingBox').style.display = 'none';
+    document.getElementById('map').style.display = 'block';
+    document.getElementById('metaBox').style.display = 'block';
+    document.getElementById('errorMsg').style.display = 'none';
 
+    // Badge info
+    var badges = document.getElementById('walkBadges');
+    badges.innerHTML = [
+      '<span class="walk-badge">⏱ ' + proposal.walk.minutes + ' min</span>',
+      '<span class="walk-badge">📍 ' + proposal.walk.distanceKm + ' km</span>',
+      '<span class="walk-badge">🔄 Loop</span>'
+    ].join('');
 
+    var sourceNote = document.getElementById('sourceNote');
+    if (proposal.source === 'osrm-loop') {
+      sourceNote.textContent = '✅ Percorso reale calcolato su strade pedonali (OSRM + OpenStreetMap)';
+    } else if (proposal.source === 'synthetic-loop') {
+      sourceNote.textContent = '⚠️ Percorso approssimato (OSRM non raggiungibile)';
+    } else {
+      sourceNote.textContent = 'Percorso: ' + (proposal.walk.type || '');
+    }
 
+    // Mappa
+    if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+    mapInstance = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(mapInstance);
 
+    var pts = proposal.route.map(function(x) { return [x.lat, x.lng]; });
+    L.polyline(pts, { color: '#22c55e', weight: 4, opacity: 0.9 }).addTo(mapInstance);
 
+    // Marker partenza
+    var startIcon = L.divIcon({ className: '', html: '<div style="background:#22c55e;color:#fff;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:bold;white-space:nowrap">📍 Partenza</div>', iconAnchor: [30, 10] });
+    L.marker(pts[0], { icon: startIcon }).addTo(mapInstance);
 
+    // Marker punto di svolta
+    if (proposal.food && proposal.food.lat) {
+      var turnIcon = L.divIcon({ className: '', html: '<div style="background:#f59e0b;color:#fff;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:bold;white-space:nowrap">🔄 Svolta</div>', iconAnchor: [28, 10] });
+      L.marker([proposal.food.lat, proposal.food.lng], { icon: turnIcon }).addTo(mapInstance);
+    }
 
+    mapInstance.fitBounds(L.latLngBounds(pts), { padding: [24, 24] });
+  }
+
+  async function loadRoute() {
+    setLoading('Ricerca posizione GPS…');
+    try {
+      var gps = await LBW.getGPSPosition(5000);
+      if (gps) {
+        setLoading('GPS trovato! Calcolo percorso reale…');
+      } else {
+        setLoading('Calcolo percorso (posizione dalle preferenze)…');
+      }
+      var proposal = await LBW.buildWalkOnlyProposalAsync();
+      if (!proposal || !proposal.route || !proposal.route.length) {
+        setError('Impossibile generare il percorso. Riprova più tardi.');
+        return;
+      }
+      renderMap(proposal);
+    } catch (e) {
+      console.error(e);
+      setError('Errore: ' + e.message);
+    }
+  }
+
+  document.getElementById('btnRefresh').addEventListener('click', loadRoute);
+
+  loadRoute();
+})();
+</script>
+</body>
+</html>
