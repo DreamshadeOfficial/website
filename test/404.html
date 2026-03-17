@@ -127,11 +127,48 @@
             href="https://www.instagram.com/dreamshadeband/"
             target="_blank"
             rel="noopener"
+            data-app-link="instagram://user?username=dreamshadeband"
           >
             Instagram @dreamshadeband
           </a>
         </div>
       </div>
     </section>
+    <script>
+      (function () {
+        const link = document.querySelector('.social-link');
+        if (!link) return;
+        const appLink = link.dataset.appLink;
+        if (!appLink) return;
+        link.addEventListener('click', function (event) {
+          const isMobile = /(Android|iPhone|iPad|iPod)/i.test(navigator.userAgent || '');
+          if (!isMobile) return;
+          event.preventDefault();
+          let didHide = false;
+          const visibilityHandler = () => {
+            if (document.hidden) {
+              didHide = true;
+              document.removeEventListener('visibilitychange', visibilityHandler);
+            }
+          };
+          document.addEventListener('visibilitychange', visibilityHandler);
+          const cleanup = () => {
+            document.removeEventListener('visibilitychange', visibilityHandler);
+          };
+          const fallbackTimer = setTimeout(() => {
+            if (!didHide) {
+              window.open(link.href, '_blank', 'noopener');
+            }
+            cleanup();
+          }, 1200);
+          window.location.href = appLink;
+          setTimeout(() => {
+            clearTimeout(fallbackTimer);
+            cleanup();
+          }, 2500);
+        });
+      })();
+    </script>
   </body>
 </html>
+
