@@ -402,25 +402,44 @@ async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity, dirIdxO
     var angleRad = (WALK_DIRECTIONS[dirIdx] * Math.PI) / 180;
     var turnaround = movePoint(origin.lat, origin.lng, halfMeters * Math.cos(angleRad), halfMeters * Math.sin(angleRad));
     try {
-      // routing.openstreetmap.de/routed-foot: profilo pedone corretto, durate reali, nessuna API key
-      var base = 'https://routing.openstreetmap.de/routed-foot/route/v1/driving';
-      var outUrl = base + '/' + origin.lng + ',' + origin.lat + ';' + turnaround.lng + ',' + turnaround.lat + '?overview=full&geometries=geojson';
-      var retUrl = base + '/' + turnaround.lng + ',' + turnaround.lat + ';' + origin.lng + ',' + origin.lat + '?overview=full&geometries=geojson';
-      var resps = await Promise.all([fetch(outUrl), fetch(retUrl)]);
+      // OpenRouteService foot-walking: profilo pedone reale, durate accurate
+      var orsKey = (window.W2E_CONFIG && window.W2E_CONFIG.orsApiKey) || '';
+      var orsBase = 'https://api.openrouteservice.org/v2/directions/foot-walking';
+      var orsHeaders = { 'Authorization': orsKey, 'Content-Type': 'application/json' };
+      var makeOrsBody = function(from, to) {
+        return JSON.stringify({ coordinates: [[from.lng, from.lat], [to.lng, to.lat]], instructions: false });
+      };
+      var resps = await Promise.all([
+        fetch(orsBase, { method: 'POST', headers: orsHeaders, body: makeOrsBody(origin, turnaround) }),
+        fetch(orsBase, { method: 'POST', headers: orsHeaders, body: makeOrsBody(turnaround, origin) })
+      ]);
       var datas = await Promise.all(resps.map(function(r) { return r.json(); }));
-      var outRoute = datas[0].routes && datas[0].routes[0];
-      var retRoute = datas[1].routes && datas[1].routes[0];
-      if (!outRoute || !retRoute) { console.warn('OSM-foot dir ' + dirIdx + ': nessun percorso'); continue; }
-      var totalMeters = outRoute.distance + retRoute.distance;
+      var outSeg = datas[0].routes && datas[0].routes[0] && datas[0].routes[0].summary;
+      var retSeg = datas[1].routes && datas[1].routes[0] && datas[1].routes[0].summary;
+      if (!outSeg || !retSeg) { console.warn('ORS dir ' + dirIdx + ': nessun percorso', datas[0]); continue; }
+      var totalMeters = outSeg.distance + retSeg.distance;
       if (totalMeters > maxTotalMeters) {
-        console.warn('OSM-foot dir ' + dirIdx + ': percorso troppo lungo (' + Math.round(totalMeters/1000) + ' km), provo altra direzione');
+        console.warn('ORS dir ' + dirIdx + ': percorso troppo lungo (' + Math.round(totalMeters/1000) + ' km)');
         continue;
       }
-      var outPts = outRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
-      var retPts = retRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
+      // Geometria: ORS restituisce encoded polyline in routes[0].geometry
+      function decodePolyline(encoded) {
+        var pts = [], idx = 0, lat = 0, lng = 0;
+        while (idx < encoded.length) {
+          var b, shift = 0, result = 0;
+          do { b = encoded.charCodeAt(idx++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+          lat += (result & 1) ? ~(result >> 1) : (result >> 1);
+          shift = 0; result = 0;
+          do { b = encoded.charCodeAt(idx++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+          lng += (result & 1) ? ~(result >> 1) : (result >> 1);
+          pts.push({ lat: lat / 1e5, lng: lng / 1e5 });
+        }
+        return pts;
+      }
+      var outPts = decodePolyline(datas[0].routes[0].geometry);
+      var retPts = decodePolyline(datas[1].routes[0].geometry);
       var totalDist = +((totalMeters) / 1000).toFixed(2);
-      // Durata dal server pedone (secondi → minuti), arrotondata
-      var totalMin = Math.round((outRoute.duration + retRoute.duration) / 60);
+      var totalMin = Math.round((outSeg.duration + retSeg.duration) / 60);
       return {
         route: outPts.concat(retPts.slice(1)),
         turnaround: outPts[outPts.length - 1],
