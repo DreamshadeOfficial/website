@@ -385,41 +385,54 @@ function peekWalkDir() {
 }
 
 // --- Loop pedonale reale via OSRM (andata + ritorno, nessun ristorante) ---
-// halfMeters calibrato su velocità OSRM pedonale (~84 m/min) con fattore tortuosità 0.65
+// Velocità pedonale: 5 km/h = 83 m/min. windingFactor: le strade sono ~30% più lunghe della retta.
+// halfMeters = distanza crow-fly al punto di svolta, tale che OSRM torni ~walkMinutes/2 per tratta.
 async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity, dirIdxOverride) {
-  var osrmPace = 84; // m/min, velocità pedonale OSRM
-  var windingFactor = 0.65; // strade più lunghe della retta
-  var halfMeters = Math.round((walkMinutes / 2) * osrmPace * windingFactor);
+  var walkSpeedMpm = 83; // m/min (5 km/h)
+  var windingFactor = 0.70; // il crow-fly è ~70% della distanza stradale reale
+  var halfMeters = Math.round((walkMinutes / 2) * walkSpeedMpm * windingFactor);
+  // Max plausibile: walkMinutes * walkSpeedMpm (percorso totale a/r in linea retta)
+  var maxTotalMeters = walkMinutes * walkSpeedMpm * 2.5;
 
-  var dirIdx = (typeof dirIdxOverride === 'number') ? dirIdxOverride : peekWalkDir();
-  var angleRad = (WALK_DIRECTIONS[dirIdx % 8] * Math.PI) / 180;
-  var turnaround = movePoint(origin.lat, origin.lng, halfMeters * Math.cos(angleRad), halfMeters * Math.sin(angleRad));
+  var startDirIdx = (typeof dirIdxOverride === 'number') ? dirIdxOverride : peekWalkDir();
 
-  try {
-    var base = 'https://router.project-osrm.org/route/v1/foot';
-    var outUrl = base + '/' + origin.lng + ',' + origin.lat + ';' + turnaround.lng + ',' + turnaround.lat + '?overview=full&geometries=geojson';
-    var retUrl = base + '/' + turnaround.lng + ',' + turnaround.lat + ';' + origin.lng + ',' + origin.lat + '?overview=full&geometries=geojson';
-    var resps = await Promise.all([fetch(outUrl), fetch(retUrl)]);
-    var datas = await Promise.all(resps.map(function(r) { return r.json(); }));
-    var outRoute = datas[0].routes && datas[0].routes[0];
-    var retRoute = datas[1].routes && datas[1].routes[0];
-    if (!outRoute || !retRoute) throw new Error('Nessun percorso OSRM');
-    var outPts = outRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
-    var retPts = retRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
-    var totalDist = +((outRoute.distance + retRoute.distance) / 1000).toFixed(2);
-    var totalMin = Math.round((outRoute.duration + retRoute.duration) / 60);
-    return {
-      route: outPts.concat(retPts.slice(1)),
-      turnaround: outPts[outPts.length - 1],
-      distanceKm: totalDist,
-      minutes: totalMin,
-      dirIdx: dirIdx,
-      source: 'osrm-loop'
-    };
-  } catch (e) {
-    console.warn('OSRM loop fallito, uso sintetico:', e.message);
-    return null;
+  // Prova fino a 4 direzioni partendo da startDirIdx; scarta se OSRM ritorna distanza irrealistica
+  for (var attempt = 0; attempt < 4; attempt++) {
+    var dirIdx = (startDirIdx + attempt) % 8;
+    var angleRad = (WALK_DIRECTIONS[dirIdx] * Math.PI) / 180;
+    var turnaround = movePoint(origin.lat, origin.lng, halfMeters * Math.cos(angleRad), halfMeters * Math.sin(angleRad));
+    try {
+      var base = 'https://router.project-osrm.org/route/v1/foot';
+      var outUrl = base + '/' + origin.lng + ',' + origin.lat + ';' + turnaround.lng + ',' + turnaround.lat + '?overview=full&geometries=geojson';
+      var retUrl = base + '/' + turnaround.lng + ',' + turnaround.lat + ';' + origin.lng + ',' + origin.lat + '?overview=full&geometries=geojson';
+      var resps = await Promise.all([fetch(outUrl), fetch(retUrl)]);
+      var datas = await Promise.all(resps.map(function(r) { return r.json(); }));
+      var outRoute = datas[0].routes && datas[0].routes[0];
+      var retRoute = datas[1].routes && datas[1].routes[0];
+      if (!outRoute || !retRoute) { console.warn('OSRM dir ' + dirIdx + ': nessun percorso'); continue; }
+      var totalMeters = outRoute.distance + retRoute.distance;
+      if (totalMeters > maxTotalMeters) {
+        console.warn('OSRM dir ' + dirIdx + ': percorso troppo lungo (' + Math.round(totalMeters/1000) + ' km), provo altra direzione');
+        continue;
+      }
+      var outPts = outRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
+      var retPts = retRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
+      var totalDist = +((totalMeters) / 1000).toFixed(2);
+      var totalMin = Math.round((outRoute.duration + retRoute.duration) / 60);
+      return {
+        route: outPts.concat(retPts.slice(1)),
+        turnaround: outPts[outPts.length - 1],
+        distanceKm: totalDist,
+        minutes: totalMin,
+        dirIdx: dirIdx,
+        source: 'osrm-loop'
+      };
+    } catch (e) {
+      console.warn('OSRM dir ' + dirIdx + ' errore:', e.message);
+    }
   }
+  console.warn('OSRM: tutte le direzioni fallite, uso sintetico');
+  return null;
 }
 
 // --- Proposal walk-only asincrona (nessun ristorante) ---
