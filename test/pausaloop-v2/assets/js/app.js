@@ -370,15 +370,29 @@ async function getGPSPosition(timeoutMs) {
   });
 }
 
-// --- Loop pedonale reale via OSRM (andata + ritorno, nessun ristorante) ---
-async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity) {
-  var paceMpm = intensity === 'dinamica' ? 95 : intensity === 'media' ? 80 : 65;
-  var halfMeters = (walkMinutes * paceMpm) / 2;
+// 8 direzioni cardinali per le alternative
+var WALK_DIRECTIONS = [0, 45, 90, 135, 180, 225, 270, 315];
 
-  // Direzione cambia ogni ora per variare il percorso
-  var directions = [0, 45, 90, 135, 180, 225, 270, 315];
-  var dirIdx = Math.floor(Date.now() / 3600000) % 8;
-  var angleRad = (directions[dirIdx] * Math.PI) / 180;
+function getNextWalkDir() {
+  var idx = Store.get('lbw_walk_dir', Math.floor(Date.now() / 3600000) % 8);
+  var next = (idx + 1) % 8;
+  Store.set('lbw_walk_dir', next);
+  return idx;
+}
+
+function peekWalkDir() {
+  return Store.get('lbw_walk_dir', Math.floor(Date.now() / 3600000) % 8);
+}
+
+// --- Loop pedonale reale via OSRM (andata + ritorno, nessun ristorante) ---
+// halfMeters calibrato su velocità OSRM pedonale (~84 m/min) con fattore tortuosità 0.65
+async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity, dirIdxOverride) {
+  var osrmPace = 84; // m/min, velocità pedonale OSRM
+  var windingFactor = 0.65; // strade più lunghe della retta
+  var halfMeters = Math.round((walkMinutes / 2) * osrmPace * windingFactor);
+
+  var dirIdx = (typeof dirIdxOverride === 'number') ? dirIdxOverride : peekWalkDir();
+  var angleRad = (WALK_DIRECTIONS[dirIdx % 8] * Math.PI) / 180;
   var turnaround = movePoint(origin.lat, origin.lng, halfMeters * Math.cos(angleRad), halfMeters * Math.sin(angleRad));
 
   try {
@@ -392,11 +406,14 @@ async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity) {
     if (!outRoute || !retRoute) throw new Error('Nessun percorso OSRM');
     var outPts = outRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
     var retPts = retRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
+    var totalDist = +((outRoute.distance + retRoute.distance) / 1000).toFixed(2);
+    var totalMin = Math.round((outRoute.duration + retRoute.duration) / 60);
     return {
       route: outPts.concat(retPts.slice(1)),
       turnaround: outPts[outPts.length - 1],
-      distanceKm: +((outRoute.distance + retRoute.distance) / 1000).toFixed(2),
-      minutes: Math.round((outRoute.duration + retRoute.duration) / 60),
+      distanceKm: totalDist,
+      minutes: totalMin,
+      dirIdx: dirIdx,
       source: 'osrm-loop'
     };
   } catch (e) {
@@ -406,12 +423,13 @@ async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity) {
 }
 
 // --- Proposal walk-only asincrona (nessun ristorante) ---
-async function buildWalkOnlyProposalAsync(prefsOverride) {
+async function buildWalkOnlyProposalAsync(prefsOverride, forceNewDir) {
   var p = prefsOverride || getPrefs();
   var gpsPos = await getGPSPosition(5000);
   var origin = gpsPos || { lat: p.location.lat, lng: p.location.lng };
 
-  var loopResult = await buildWalkingLoopRealAsync(origin, p.walkMinutes, p.intensity);
+  var dirIdx = forceNewDir ? getNextWalkDir() : peekWalkDir();
+  var loopResult = await buildWalkingLoopRealAsync(origin, p.walkMinutes, p.intensity, dirIdx);
 
   if (loopResult) {
     var proposal = {
@@ -430,9 +448,8 @@ async function buildWalkOnlyProposalAsync(prefsOverride) {
   // Fallback sintetico se OSRM non risponde
   var speed = p.intensity === 'dinamica' ? 5.5 : p.intensity === 'media' ? 4.7 : 4.0;
   var walkKm = +(speed * (p.walkMinutes / 60)).toFixed(1);
-  var dirIdx2 = Math.floor(Date.now() / 3600000) % 8;
-  var angleRad2 = ([0,45,90,135,180,225,270,315][dirIdx2] * Math.PI) / 180;
-  var halfM = (walkKm * 1000) / 2;
+  var angleRad2 = (WALK_DIRECTIONS[dirIdx % 8] * Math.PI) / 180;
+  var halfM = (walkKm * 500) * 0.65;
   var fallbackTurn = movePoint(origin.lat, origin.lng, halfM * Math.cos(angleRad2), halfM * Math.sin(angleRad2));
   var fallbackLoop = buildWalkingLoop({ lat: origin.lat, lng: origin.lng }, fallbackTurn, p.walkMinutes, p.intensity);
   var fallbackProposal = {
