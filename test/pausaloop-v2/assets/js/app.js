@@ -418,7 +418,8 @@ async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity, dirIdxO
       var outPts = outRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
       var retPts = retRoute.geometry.coordinates.map(function(c) { return { lat: c[1], lng: c[0] }; });
       var totalDist = +((totalMeters) / 1000).toFixed(2);
-      var totalMin = Math.round((outRoute.duration + retRoute.duration) / 60);
+      // OSRM pubblico usa velocità auto per la durata → calcoliamo noi da distanza reale a 5 km/h (83 m/min)
+      var totalMin = Math.round(totalMeters / 83);
       return {
         route: outPts.concat(retPts.slice(1)),
         turnaround: outPts[outPts.length - 1],

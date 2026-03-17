@@ -82,8 +82,8 @@
   </div>
 </div>
 
-<script src='assets/js/routes-poc-data.js?v=20260317d'></script>
-<script src='assets/js/app.js?v=20260317d'></script>
+<script src='assets/js/routes-poc-data.js?v=20260317e'></script>
+<script src='assets/js/app.js?v=20260317e'></script>
 <script>
 (function() {
   var HEART_OFF = '\u2661', HEART_ON = '\u2764';
@@ -133,11 +133,11 @@
 
   function renderBreakdown(p) {
     var walkTotal = p.walk.minutes;
-    var walkOut = Math.max(6, Math.floor(walkTotal * 0.5));
-    var walkBack = Math.max(4, walkTotal - walkOut);
+    var walkOut = Math.round(walkTotal / 2);
+    var walkBack = walkTotal - walkOut;
     document.getElementById('timeBreakdown').innerHTML =
-      '<div>Andata: <b>' + walkOut + ' min</b></div>' +
-      '<div>Ritorno: <b>' + walkBack + ' min</b></div>' +
+      '<div>Andata: <b>~' + walkOut + ' min</b></div>' +
+      '<div>Ritorno: <b>~' + walkBack + ' min</b></div>' +
       '<hr style="border-color:#334155">' +
       '<div>Totale: <b>' + walkTotal + ' min</b> • <b>' + p.walk.distanceKm + ' km</b></div>';
   }
