@@ -384,20 +384,24 @@ function peekWalkDir() {
   return Store.get('lbw_walk_dir', Math.floor(Date.now() / 3600000) % 8);
 }
 
-// --- Loop pedonale reale via OSRM (andata + ritorno, nessun ristorante) ---
-// Velocità pedonale: 5 km/h = 83 m/min. windingFactor: le strade sono ~30% più lunghe della retta.
-// halfMeters = distanza crow-fly al punto di svolta, tale che OSRM torni ~walkMinutes/2 per tratta.
+// --- Loop pedonale reale via ORS (andata + ritorno, nessun ristorante) ---
+// Velocità pedonale ORS: ~4.5 km/h = 75 m/min. windingFactor: le strade sono ~30% più lunghe della retta.
+// halfMeters = distanza crow-fly al punto di svolta, tale che ORS torni ~walkMinutes/2 per tratta.
 async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity, dirIdxOverride) {
-  var walkSpeedMpm = 83; // m/min (5 km/h)
+  var walkSpeedMpm = 75; // m/min (~4.5 km/h, calibrato su ORS foot-walking)
   var windingFactor = 0.70; // il crow-fly è ~70% della distanza stradale reale
   var halfMeters = Math.round((walkMinutes / 2) * walkSpeedMpm * windingFactor);
-  // Max plausibile: walkMinutes * walkSpeedMpm (percorso totale a/r in linea retta)
-  var maxTotalMeters = walkMinutes * walkSpeedMpm * 2.5;
+  // Max plausibile: più stringente — percorso totale non deve eccedere 1.6x il teorico
+  var maxTotalMeters = walkMinutes * walkSpeedMpm * 1.6;
+  // Tolleranza durata: il percorso ORS deve stare entro ±60% del walkMinutes atteso
+  var expectedTotalSec = walkMinutes * 60;
+  var minDurSec = expectedTotalSec * 0.4;
+  var maxDurSec = expectedTotalSec * 1.6;
 
   var startDirIdx = (typeof dirIdxOverride === 'number') ? dirIdxOverride : peekWalkDir();
 
-  // Prova fino a 4 direzioni partendo da startDirIdx; scarta se OSRM ritorna distanza irrealistica
-  for (var attempt = 0; attempt < 4; attempt++) {
+  // Prova fino a 8 direzioni partendo da startDirIdx; scarta se ORS ritorna distanza/durata irrealistica
+  for (var attempt = 0; attempt < 8; attempt++) {
     var dirIdx = (startDirIdx + attempt) % 8;
     var angleRad = (WALK_DIRECTIONS[dirIdx] * Math.PI) / 180;
     var turnaround = movePoint(origin.lat, origin.lng, halfMeters * Math.cos(angleRad), halfMeters * Math.sin(angleRad));
@@ -418,8 +422,13 @@ async function buildWalkingLoopRealAsync(origin, walkMinutes, intensity, dirIdxO
       var retSeg = datas[1].routes && datas[1].routes[0] && datas[1].routes[0].summary;
       if (!outSeg || !retSeg) { console.warn('ORS dir ' + dirIdx + ': nessun percorso', datas[0]); continue; }
       var totalMeters = outSeg.distance + retSeg.distance;
+      var totalDurSec = outSeg.duration + retSeg.duration;
       if (totalMeters > maxTotalMeters) {
-        console.warn('ORS dir ' + dirIdx + ': percorso troppo lungo (' + Math.round(totalMeters/1000) + ' km)');
+        console.warn('ORS dir ' + dirIdx + ': percorso troppo lungo (' + Math.round(totalMeters/1000) + ' km, max ' + Math.round(maxTotalMeters/1000) + ' km)');
+        continue;
+      }
+      if (totalDurSec < minDurSec || totalDurSec > maxDurSec) {
+        console.warn('ORS dir ' + dirIdx + ': durata anomala (' + Math.round(totalDurSec/60) + ' min, atteso ' + walkMinutes + ' min ±60%)');
         continue;
       }
       // Geometria: ORS restituisce encoded polyline in routes[0].geometry
