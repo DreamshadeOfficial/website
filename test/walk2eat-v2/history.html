@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>Cronologia • Walk2Eat</title>
+  <link rel="icon" href="assets/branding-hq/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+<div class="container page-enter">
+
+  <div class="top-header">
+    <a class="brand" href="dashboard.html">
+      <img class="brand-logo" src="assets/branding-hq/walk2eat-navbar-dark-128.png" alt="Walk2Eat">
+      <span class="brand-text">Walk<span class="brand-two">2</span>Eat</span>
+    </a>
+  </div>
+
+  <h2 class="section-title">📋 Cronologia pause</h2>
+
+  <div id="hist" class="list"></div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-icon">🏠</span><span>Home</span>
+    </a>
+    <a href="map.html" class="nav-item">
+      <span class="nav-icon">🗺️</span><span>Mappa</span>
+    </a>
+    <a href="favorites.html" class="nav-item">
+      <span class="nav-icon">❤️</span><span>Preferiti</span>
+    </a>
+    <a href="history.html" class="nav-item active">
+      <span class="nav-icon">📋</span><span>Cronologia</span>
+    </a>
+    <a href="preferences.html" class="nav-item">
+      <span class="nav-icon">⚙️</span><span>Impostazioni</span>
+    </a>
+  </div>
+</nav>
+
+<script src="assets/js/routes-poc-data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function() {
+  var HEART_OFF = '♡', HEART_ON = '❤️';
+  var hist = LBW.Store.get('lbw_history', []);
+  var histEl = document.getElementById('hist');
+  var maps = {};
+
+  function drawMap(id, proposal) {
+    var mapId = 'map-' + id;
+    var el = document.getElementById(mapId);
+    if (!el || !proposal || !proposal.route || proposal.route.length < 2) return;
+    var m = maps[mapId];
+    if (!m) { m = L.map(mapId, { zoomControl: false, attributionControl: false }); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m); maps[mapId] = m; }
+    var pts = proposal.route.map(function(x) { return [x.lat, x.lng]; });
+    L.polyline(pts, { color: '#22c55e', weight: 4 }).addTo(m);
+    L.marker(pts[0]).addTo(m);
+    m.fitBounds(L.latLngBounds(pts), { padding: [18, 18] });
+  }
+
+  if (!hist.length) {
+    histEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🕐</div><div class="empty-state-text">Nessuna pausa registrata<br><span class="small">Le tue pause appariranno qui</span></div></div>';
+    return;
+  }
+
+  histEl.innerHTML = hist.map(function(x, i) {
+    var pFav = LBW.isFavoritePlace(x.food) ? HEART_ON : HEART_OFF;
+    var rFav = LBW.isFavoriteRoute(x) ? HEART_ON : HEART_OFF;
+    var dateStr = new Date(x.createdAt).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+    return '<div class="card">' +
+      '<div style="display:flex;align-items:center;gap:10px">' +
+      '<div style="font-size:1.3rem;flex-shrink:0">🚶</div>' +
+      '<div style="flex:1;min-width:0">' +
+      '<div style="font-weight:700">' + (x.food.name || 'Percorso') + '</div>' +
+      '<div class="small">' + x.walk.minutes + ' min • ' + x.walk.distanceKm + ' km</div>' +
+      '<div class="small" style="opacity:0.6">' + dateStr + '</div>' +
+      '</div></div>' +
+      '<div class="btn-row" style="margin-top:8px">' +
+      '<button class="btn btn-ghost" style="flex:1;font-size:0.8rem" id="favRoute' + i + '">' + rFav + ' Percorso</button>' +
+      '<button class="btn btn-ghost" style="flex:1;font-size:0.8rem" id="toggle' + i + '">📍 Mappa</button>' +
+      '<button class="btn btn-secondary" style="flex:1;font-size:0.8rem" id="select' + i + '">▶ Usa</button>' +
+      '</div>' +
+      '<div id="detail' + i + '" style="display:none;margin-top:8px">' +
+      '<div id="map-' + i + '" class="map-box" style="height:180px"></div>' +
+      '</div></div>';
+  }).join('');
+
+  setTimeout(function() {
+    hist.forEach(function(x, i) {
+      var br = document.getElementById('favRoute' + i);
+      var tg = document.getElementById('toggle' + i);
+      var dt = document.getElementById('detail' + i);
+      var sl = document.getElementById('select' + i);
+
+      if (br) br.onclick = function() {
+        var on = LBW.toggleFavoriteRoute(x);
+        br.innerHTML = (on ? HEART_ON : HEART_OFF) + ' Percorso';
+      };
+      if (tg) tg.onclick = function() {
+        var open = dt.style.display !== 'none';
+        dt.style.display = open ? 'none' : 'block';
+        tg.textContent = open ? '📍 Mappa' : '✖ Chiudi';
+        if (!open) drawMap(i, x);
+      };
+      if (sl) sl.onclick = function() {
+        LBW.Store.set('lbw_today', x);
+        window.location.href = 'dashboard.html';
+      };
+    });
+  }, 0);
+})();
+</script>
+</body>
+</html>

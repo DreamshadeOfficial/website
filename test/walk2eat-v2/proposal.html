@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>Proposta • Walk2Eat</title>
+  <link rel="icon" href="assets/branding-hq/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<div class="container page-enter">
+
+  <div class="top-header">
+    <a class="brand" href="dashboard.html">
+      <img class="brand-logo" src="assets/branding-hq/walk2eat-navbar-dark-128.png" alt="Walk2Eat">
+      <span class="brand-text">Walk<span class="brand-two">2</span>Eat</span>
+    </a>
+    <a class="btn btn-ghost" href="dashboard.html">← Home</a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🍽️ Proposta pausa pranzo</span>
+    </div>
+    <div id="main"></div>
+  </div>
+
+  <h2 class="section-title">🔄 Alternative</h2>
+  <div id="alts" class="list"></div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-icon">🏠</span><span>Home</span>
+    </a>
+    <a href="map.html" class="nav-item">
+      <span class="nav-icon">🗺️</span><span>Mappa</span>
+    </a>
+    <a href="favorites.html" class="nav-item">
+      <span class="nav-icon">❤️</span><span>Preferiti</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <span class="nav-icon">📋</span><span>Cronologia</span>
+    </a>
+    <a href="preferences.html" class="nav-item">
+      <span class="nav-icon">⚙️</span><span>Impostazioni</span>
+    </a>
+  </div>
+</nav>
+
+<script src="assets/js/routes-poc-data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function() {
+  var HEART_OFF = '♡', HEART_ON = '❤️';
+  var p = LBW.getProposal();
+  var mainEl = document.getElementById('main');
+  var altsEl = document.getElementById('alts');
+  var mainFav = LBW.isFavoritePlace(p.food) ? HEART_ON : HEART_OFF;
+  var mainInfo = [p.food.cuisine];
+  if (p.food.price && p.food.price !== '-') mainInfo.push(p.food.price);
+
+  mainEl.innerHTML =
+    '<div class="stat-card" style="margin-bottom:12px;text-align:left">' +
+    '<div style="font-size:1.2rem;font-weight:800;color:var(--accent)">' + p.food.name + '</div>' +
+    '<div class="small mt-sm">' + mainInfo.join(' • ') + '</div>' +
+    '</div>' +
+    '<div class="grid grid-2">' +
+    '<div class="stat-card"><div class="stat-value">' + p.walk.minutes + '</div><div class="stat-label">min camminata</div></div>' +
+    '<div class="stat-card"><div class="stat-value">' + p.walk.distanceKm + '</div><div class="stat-label">km</div></div>' +
+    '</div>' +
+    '<div class="btn-row">' +
+    '<button class="btn btn-primary" id="saveMain" style="flex:1">' + mainFav + ' Preferito</button>' +
+    (p.food.reserveUrl ? '<a class="btn btn-ghost" href="' + p.food.reserveUrl + '" target="_blank" style="flex:1">📞 Riserva</a>' : '') +
+    '</div>';
+
+  setTimeout(function() {
+    var b = document.getElementById('saveMain');
+    if (b) b.onclick = function() {
+      var on = LBW.toggleFavoritePlace(p.food);
+      b.innerHTML = (on ? HEART_ON : HEART_OFF) + ' Preferito';
+    };
+  }, 0);
+
+  altsEl.innerHTML = p.alternatives.map(function(a, i) {
+    var fav = LBW.isFavoritePlace(a) ? HEART_ON : HEART_OFF;
+    var info = [a.cuisine || 'Food'];
+    if (a.price && a.price !== '-') info.push(a.price);
+    if (typeof a.distance === 'number') info.push(a.distance.toFixed(1) + ' km');
+    return '<div class="card">' +
+      '<div style="display:flex;align-items:center;gap:10px">' +
+      '<span style="font-size:1.3rem">🍽️</span>' +
+      '<div style="flex:1"><div style="font-weight:700">' + a.name + '</div><div class="small">' + info.join(' • ') + '</div></div>' +
+      '</div>' +
+      '<div class="btn-row">' +
+      '<a class="btn btn-ghost" href="place.html?id=' + a.id + '" style="flex:1;font-size:0.8rem">📋 Scheda</a>' +
+      '<button class="btn btn-ghost" id="saveAlt' + i + '" style="flex:1;font-size:0.8rem">' + fav + ' Salva</button>' +
+      '</div></div>';
+  }).join('');
+
+  setTimeout(function() {
+    p.alternatives.forEach(function(a, i) {
+      var b = document.getElementById('saveAlt' + i);
+      if (b) b.onclick = function() {
+        var on = LBW.toggleFavoritePlace(a);
+        b.innerHTML = (on ? HEART_ON : HEART_OFF) + ' Salva';
+      };
+    });
+  }, 0);
+})();
+</script>
+</body>
+</html>
