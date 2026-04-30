@@ -146,7 +146,7 @@
     .hero-bg {
       position: absolute;
       inset: 0;
-      background: url('../RISE/Dreamshade-3-H-HD.jpg') center top / cover no-repeat;
+      background: url('../RISE/Dreamshade-3-H-HD.jpg') center 25% / cover no-repeat;
       filter: brightness(0.51) saturate(1.2);
       transform: scale(1.04);
       animation: heroZoom 18s ease-in-out infinite alternate;
@@ -598,11 +598,16 @@
     @media (max-width: 768px) {
       nav { padding: 16px 24px; }
       .nav-links { display: none; }
+      .nav-cta { display: none; }
       .nav-hamburger { display: flex; }
       section, .contact-section { padding: 72px 24px; }
       .about-grid { grid-template-columns: 1fr; gap: 48px; }
       .about-emblem { display: none; }
       footer { flex-direction: column; gap: 16px; text-align: center; padding: 32px 24px; }
+      .hero-bg {
+        background-position: center 20%;
+        animation: none;
+      }
     }
 
     @media (max-width: 480px) {
