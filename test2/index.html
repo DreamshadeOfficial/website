@@ -763,12 +763,25 @@
           data-display-logo="true"
           data-separator-color="white"
           data-background-color="transparent"
-          data-text-color="white"
-          data-link-color="white"
-          data-link-text-color="white"
+          data-text-color="#111111"
+          data-link-color="#111111"
+          data-link-text-color="#111111"
           data-display-play-my-city="false"
           data-font="">
         </a>
+        <style>
+        /* Force Bandsintown button text color */
+        #gig-container .bit-button,
+        #gig-container .bit-track-button,
+        #gig-container a[class*="bit-"] {
+          color: #111111 !important;
+          background-color: #ffffff !important;
+          border-color: #d1d5db !important;
+        }
+        #gig-container * {
+          color: #111111 !important;
+        }
+        </style>
       </div>
     </div>
   </section>
