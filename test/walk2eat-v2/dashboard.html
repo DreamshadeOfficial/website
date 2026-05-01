@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>La tua pausa • Walk2Eat</title>
+  <link rel="icon" href="assets/branding-hq/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+<div class="container page-enter">
+
+  <!-- Top Header -->
+  <div class="top-header">
+    <a class="brand" href="dashboard.html">
+      <img class="brand-logo" src="assets/branding-hq/walk2eat-navbar-dark-128.png" alt="Walk2Eat">
+      <span class="brand-text">Walk<span class="brand-two">2</span>Eat</span>
+    </a>
+    <div class="header-actions">
+      <span id="hello" class="small" style="color:var(--accent)"></span>
+    </div>
+  </div>
+
+  <!-- Walk Stats -->
+  <div class="grid grid-2" style="margin-top:8px">
+    <div class="stat-card">
+      <div class="stat-value" id="walkStat">—</div>
+      <div class="stat-label">🚶 Camminata</div>
+      <div class="small mt-sm" id="walkType"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="foodStat">—</div>
+      <div class="stat-label" id="foodLabel">📍 Destinazione</div>
+      <div class="small mt-sm" id="foodCuisine"></div>
+    </div>
+  </div>
+
+  <!-- Map Preview -->
+  <div class="card" style="margin-top:12px">
+    <div class="card-header">
+      <span class="badge badge-accent">📍 Percorso</span>
+      <span class="small" id="updatedAt"></span>
+    </div>
+    <div id="mapLoadingBox" class="map-loading">
+      <div class="spinner"></div>
+      <span id="mapLoadingMsg">Calcolo percorso…</span>
+    </div>
+    <div id="mapPreview" class="map-box" style="display:none"></div>
+    <p id="routeSourceNote" class="small mt-sm" style="display:none"></p>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="btn-row">
+    <a class="btn btn-primary" href="map.html" style="flex:1">
+      🗺️ Segui percorso
+    </a>
+    <button id="refreshWalk" class="btn btn-secondary" style="flex:1">
+      🔄 Alternativa
+    </button>
+  </div>
+  <div class="btn-row">
+    <button id="save" class="btn btn-ghost" style="flex:1">
+      ♡ Salva
+    </button>
+    <button id="detailToggle" class="btn btn-ghost" style="flex:1">
+      📊 Dettagli
+    </button>
+  </div>
+
+  <!-- Detail Panel (animated) -->
+  <div id="detailPanel" class="detail-panel">
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⏱ Tempi</span>
+        </div>
+        <div id="timeBreakdown" class="small"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🌤 Meteo</span>
+        </div>
+        <div id="weatherBox" class="small"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-header">
+        <span class="card-title">💡 Perché questa proposta</span>
+      </div>
+      <div id="whyBox" class="small"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="dashboard.html" class="nav-item active">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="map.html" class="nav-item">
+      <span class="nav-icon">🗺️</span>
+      <span>Mappa</span>
+    </a>
+    <a href="favorites.html" class="nav-item">
+      <span class="nav-icon">❤️</span>
+      <span>Preferiti</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <span class="nav-icon">📋</span>
+      <span>Cronologia</span>
+    </a>
+    <a href="preferences.html" class="nav-item">
+      <span class="nav-icon">⚙️</span>
+      <span>Impostazioni</span>
+    </a>
+  </div>
+</nav>
+
+<script src="assets/js/routes-poc-data.js?v=20260329a"></script>
+<script src="assets/js/config.js?v=20260329a"></script>
+<script src="assets/js/app.js?v=20260329a"></script>
+<script>
+(function() {
+  var HEART_OFF = '\u2661', HEART_ON = '\u2764\uFE0F';
+  var u = LBW.getUser();
+  if (!u) { location.href = 'login.html'; return; }
+  var prefs = LBW.getPrefs();
+
+  document.getElementById('hello').textContent = 'Ciao ' + u.name + ' 👋';
+
+  var map = null, routeLine = null, startMarker = null, turnMarker = null;
+  var currentProposal = null;
+
+  function initMap() {
+    if (map) return;
+    map = L.map('mapPreview', { zoomControl: false, attributionControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  }
+
+  function setMapLoading(msg) {
+    document.getElementById('mapLoadingBox').style.display = 'flex';
+    document.getElementById('mapLoadingMsg').textContent = msg || 'Calcolo percorso…';
+    document.getElementById('mapPreview').style.display = 'none';
+    document.getElementById('routeSourceNote').style.display = 'none';
+  }
+
+  function setMapReady() {
+    document.getElementById('mapLoadingBox').style.display = 'none';
+    document.getElementById('mapPreview').style.display = 'block';
+  }
+
+  function weatherMock() {
+    var d = new Date();
+    var key = (d.getDate() + d.getMonth() + d.getHours()) % 4;
+    if (key === 0) return { label: 'Sole', temp: 22, bad: false };
+    if (key === 1) return { label: 'Nuvoloso', temp: 18, bad: false };
+    if (key === 2) return { label: 'Pioggia leggera', temp: 14, bad: true };
+    return { label: 'Vento forte', temp: 12, bad: true };
+  }
+
+  function renderWeather() {
+    var w = weatherMock();
+    var icon = w.label.includes('Sole') ? '☀️' : w.label.includes('Nuvoloso') ? '☁️' : w.label.includes('Pioggia') ? '🌧️' : '💨';
+    document.getElementById('weatherBox').innerHTML =
+      '<div style="display:flex;align-items:center;gap:8px">' +
+      '<span style="font-size:1.3rem">' + icon + '</span>' +
+      '<span><b>' + w.label + '</b> ' + w.temp + '°C<br>' +
+      '<span style="font-size:0.75rem">' + (w.bad ? '⚠️ Condizioni sfavorevoli' : '✅ Condizioni buone') + '</span></span></div>';
+  }
+
+  function renderBreakdown(p) {
+    var walkTotal = p.walk.minutes;
+    var walkOut = Math.round(walkTotal / 2);
+    var walkBack = walkTotal - walkOut;
+    document.getElementById('timeBreakdown').innerHTML =
+      '<div style="display:flex;flex-direction:column;gap:4px">' +
+      '<div>🏃 Andata: <b>' + walkOut + ' min</b></div>' +
+      '<div>🔙 Ritorno: <b>' + walkBack + ' min</b></div>' +
+      '<hr style="border-color:var(--card-border);margin:4px 0">' +
+      '<div>📏 Totale: <b>' + walkTotal + ' min</b> • <b>' + p.walk.distanceKm + ' km</b></div></div>';
+  }
+
+  function renderWhy(p) {
+    var reasons = [
+      '🎯 Intensità: <b>' + prefs.intensity + '</b>',
+      '🎪 Obiettivo: <b>' + prefs.goal + '</b>',
+      '🔄 Percorso ad anello: parti e ritorni allo stesso punto'
+    ];
+    document.getElementById('whyBox').innerHTML = reasons.map(function(r) {
+      return '<div style="padding:3px 0">' + r + '</div>';
+    }).join('');
+  }
+
+  function setFavButton(proposal) {
+    var saveEl = document.getElementById('save');
+    var routeFav = LBW.isFavoriteRoute(proposal);
+    if (routeFav) { saveEl.innerHTML = HEART_ON + ' Salvato'; saveEl.className = 'btn btn-secondary'; saveEl.style.flex = '1'; }
+    else { saveEl.innerHTML = HEART_OFF + ' Salva'; saveEl.className = 'btn btn-ghost'; saveEl.style.flex = '1'; }
+  }
+
+  function renderProposal(p) {
+    currentProposal = p;
+
+    document.getElementById('walkStat').textContent = p.walk.minutes + ' min';
+    document.getElementById('walkType').textContent = p.walk.distanceKm + ' km • ' + (p.walk.type || '');
+    document.getElementById('foodStat').textContent = p.food.name || '—';
+    document.getElementById('foodCuisine').textContent = p.food.cuisine || '';
+    document.getElementById('updatedAt').textContent = new Date(p.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+    setFavButton(p);
+    renderBreakdown(p);
+    renderWhy(p);
+    renderWeather();
+
+    initMap();
+    setMapReady();
+    var pts = (p.route || []).map(function(x) { return [x.lat, x.lng]; });
+    if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+    if (startMarker) { map.removeLayer(startMarker); startMarker = null; }
+    if (turnMarker) { map.removeLayer(turnMarker); turnMarker = null; }
+    if (pts.length) {
+      routeLine = L.polyline(pts, { color: '#22c55e', weight: 4, opacity: 0.9 }).addTo(map);
+      var startIcon = L.divIcon({ className: '', html: '<div style="background:#22c55e;color:#fff;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:bold">📍</div>', iconAnchor: [10, 10] });
+      startMarker = L.marker(pts[0], { icon: startIcon }).addTo(map);
+      if (p.food && p.food.lat) {
+        var turnIcon = L.divIcon({ className: '', html: '<div style="background:#f59e0b;color:#fff;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:bold">🔄</div>', iconAnchor: [10, 10] });
+        turnMarker = L.marker([p.food.lat, p.food.lng], { icon: turnIcon }).addTo(map);
+      }
+      map.fitBounds(L.latLngBounds(pts), { padding: [20, 20] });
+    }
+
+    var note = document.getElementById('routeSourceNote');
+    if (p.source === 'osrm-loop') {
+      note.textContent = '✅ Percorso reale su strade pedonali';
+      note.style.display = 'block';
+    } else if (p.source === 'synthetic-loop') {
+      note.textContent = '⚠️ Percorso approssimato (OSRM non raggiungibile)';
+      note.style.display = 'block';
+    }
+  }
+
+  async function loadNewRoute(isAlternative) {
+    var btn = document.getElementById('refreshWalk');
+    btn.classList.add('loading');
+    setMapLoading(isAlternative ? 'Calcolo alternativa…' : 'Calcolo percorso…');
+    try {
+      var proposal = await LBW.buildWalkOnlyProposalAsync(null, !!isAlternative);
+      renderProposal(proposal);
+    } catch(e) {
+      document.getElementById('mapLoadingMsg').textContent = 'Errore: ' + e.message;
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  document.getElementById('refreshWalk').onclick = function() { loadNewRoute(true); };
+
+  document.getElementById('save').onclick = function() {
+    if (!currentProposal) return;
+    LBW.toggleFavoriteRoute(currentProposal);
+    setFavButton(currentProposal);
+  };
+
+  var detailOpen = false;
+  document.getElementById('detailToggle').onclick = function() {
+    detailOpen = !detailOpen;
+    var panel = document.getElementById('detailPanel');
+    if (detailOpen) {
+      panel.classList.add('open');
+      this.innerHTML = '📊 Nascondi';
+    } else {
+      panel.classList.remove('open');
+      this.innerHTML = '📊 Dettagli';
+    }
+  };
+
+  loadNewRoute(false);
+})();
+</script>
+</body>
+</html>

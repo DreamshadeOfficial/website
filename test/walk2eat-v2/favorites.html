@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>Preferiti • Walk2Eat</title>
+  <link rel="icon" href="assets/branding-hq/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+<div class="container page-enter">
+
+  <div class="top-header">
+    <a class="brand" href="dashboard.html">
+      <img class="brand-logo" src="assets/branding-hq/walk2eat-navbar-dark-128.png" alt="Walk2Eat">
+      <span class="brand-text">Walk<span class="brand-two">2</span>Eat</span>
+    </a>
+  </div>
+
+  <h2 class="section-title">❤️ Preferiti</h2>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button id="viewAll" class="tab-btn active">🗂 Tutti</button>
+    <button id="viewRoutes" class="tab-btn">🗺️ Percorsi</button>
+    <button id="viewRestaurants" class="tab-btn">🍽️ Ristoranti</button>
+  </div>
+
+  <div id="favList" class="list"></div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-icon">🏠</span><span>Home</span>
+    </a>
+    <a href="map.html" class="nav-item">
+      <span class="nav-icon">🗺️</span><span>Mappa</span>
+    </a>
+    <a href="favorites.html" class="nav-item active">
+      <span class="nav-icon">❤️</span><span>Preferiti</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <span class="nav-icon">📋</span><span>Cronologia</span>
+    </a>
+    <a href="preferences.html" class="nav-item">
+      <span class="nav-icon">⚙️</span><span>Impostazioni</span>
+    </a>
+  </div>
+</nav>
+
+<script src="assets/js/routes-poc-data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function() {
+  var HEART_ON = '❤️';
+  var fp = LBW.Store.get('lbw_fav_places', []);
+  var fr = LBW.Store.get('lbw_fav_routes', []);
+  var prefs = LBW.getPrefs();
+  var list = document.getElementById('favList');
+  var maps = {};
+
+  function hav(a, b) {
+    var toRad = function(d) { return d * Math.PI / 180; };
+    var R = 6371, dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+    var s = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng/2)**2;
+    return 2 * R * Math.asin(Math.sqrt(s));
+  }
+
+  function proposalFromRoute(r) {
+    var rid = String(r.routeId || '');
+    var fid = rid.split('-')[0];
+    var maybePlace = fp.find(function(p) { return String(p.id) === fid; }) || { id: fid, name: r.destination, cuisine: '', price: '' };
+    return { createdAt: r.savedAt || new Date().toISOString(), walk: r.walk, food: maybePlace, route: r.route || [], alternatives: [] };
+  }
+
+  function drawMap(id, proposal) {
+    var mapId = 'fmap-' + id;
+    var el = document.getElementById(mapId);
+    if (!el || !proposal || !proposal.route || proposal.route.length < 2) return;
+    var m = maps[mapId];
+    if (!m) { m = L.map(mapId, { zoomControl: false, attributionControl: false }); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m); maps[mapId] = m; }
+    var pts = proposal.route.map(function(x) { return [x.lat, x.lng]; });
+    L.polyline(pts, { color: '#22c55e', weight: 4 }).addTo(m);
+    L.marker(pts[0]).addTo(m);
+    m.fitBounds(L.latLngBounds(pts), { padding: [18, 18] });
+  }
+
+  function bindEvents(items, type) {
+    setTimeout(function() {
+      items.forEach(function(x, i) {
+        var tg = document.getElementById('toggle' + type + i);
+        var dt = document.getElementById('detail' + type + i);
+        var rm = document.getElementById('rm' + type + i);
+        var sl = document.getElementById('select' + type + i);
+        if (tg) tg.onclick = function() {
+          var open = dt.style.display !== 'none';
+          dt.style.display = open ? 'none' : 'block';
+          tg.textContent = open ? '📍 Dettagli' : '✖ Chiudi';
+          if (!open) {
+            var pr = type === 'R' ? proposalFromRoute(x) : null;
+            if (pr) drawMap(type + i, pr);
+          }
+        };
+        if (sl) sl.onclick = function() {
+          var pr = type === 'R' ? proposalFromRoute(x) : null;
+          if (pr) { LBW.Store.set('lbw_today', pr); window.location.href = 'dashboard.html'; }
+        };
+        if (rm) rm.onclick = function() {
+          if (type === 'P') LBW.removeFavoritePlace(x);
+          else LBW.removeFavoriteRoute(proposalFromRoute(x));
+          location.reload();
+        };
+      });
+    }, 0);
+  }
+
+  function renderEmpty() {
+    return '<div class="empty-state"><div class="empty-state-icon">💫</div><div class="empty-state-text">Nessun preferito salvato</div></div>';
+  }
+
+  function cardHtml(type, item, i) {
+    if (type === 'P') {
+      var info = [item.cuisine || 'Food spot'];
+      if (item.price && item.price !== '-') info.push(item.price);
+      return '<div class="card">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+        '<span style="font-size:1.4rem">🍽️</span>' +
+        '<div style="flex:1;min-width:0"><div style="font-weight:700">' + item.name + '</div>' +
+        '<div class="small">' + info.join(' • ') + '</div></div>' +
+        '<button class="btn btn-ghost" style="padding:8px;min-height:36px;font-size:0.75rem" id="rmP' + i + '">' + HEART_ON + '</button>' +
+        '</div></div>';
+    }
+    return '<div class="card">' +
+      '<div style="display:flex;align-items:center;gap:10px">' +
+      '<span style="font-size:1.4rem">🗺️</span>' +
+      '<div style="flex:1;min-width:0"><div style="font-weight:700">' + item.destination + '</div>' +
+      '<div class="small">' + item.walk.minutes + ' min • ' + item.walk.distanceKm + ' km • ' + item.walk.type + '</div></div>' +
+      '<button class="btn btn-ghost" style="padding:8px;min-height:36px;font-size:0.75rem" id="rmR' + i + '">' + HEART_ON + '</button>' +
+      '</div>' +
+      '<div class="btn-row" style="margin-top:8px">' +
+      '<button class="btn btn-ghost" style="flex:1;font-size:0.8rem" id="toggleR' + i + '">📍 Dettagli</button>' +
+      '<button class="btn btn-secondary" style="flex:1;font-size:0.8rem" id="selectR' + i + '">▶ Seleziona</button>' +
+      '</div>' +
+      '<div id="detailR' + i + '" style="display:none;margin-top:8px">' +
+      '<div id="fmap-R' + i + '" class="map-box" style="height:180px"></div>' +
+      '</div></div>';
+  }
+
+  function renderAll() {
+    if (!fp.length && !fr.length) { list.innerHTML = renderEmpty(); return; }
+    var html = fr.map(function(x, i) { return cardHtml('R', x, i); }).join('');
+    html += fp.map(function(x, i) { return cardHtml('P', x, i); }).join('');
+    list.innerHTML = html;
+    bindEvents(fr, 'R');
+    bindEvents(fp, 'P');
+  }
+
+  function renderRoutes() {
+    if (!fr.length) { list.innerHTML = renderEmpty(); return; }
+    list.innerHTML = fr.map(function(x, i) { return cardHtml('R', x, i); }).join('');
+    bindEvents(fr, 'R');
+  }
+
+  function renderRestaurants() {
+    if (!fp.length) { list.innerHTML = renderEmpty(); return; }
+    list.innerHTML = fp.map(function(x, i) { return cardHtml('P', x, i); }).join('');
+    bindEvents(fp, 'P');
+  }
+
+  var tabs = { viewAll: renderAll, viewRoutes: renderRoutes, viewRestaurants: renderRestaurants };
+  Object.keys(tabs).forEach(function(id) {
+    document.getElementById(id).onclick = function() {
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      tabs[id]();
+    };
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>

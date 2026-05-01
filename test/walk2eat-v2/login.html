@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>Login • Walk2Eat</title>
+  <link rel="icon" href="assets/branding-hq/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="no-bottom-nav">
+<div class="container page-enter">
+
+  <div class="top-header" style="border-bottom:none;background:transparent;backdrop-filter:none">
+    <a class="brand" href="index.html">
+      <img class="brand-logo" src="assets/branding-hq/walk2eat-navbar-dark-128.png" alt="Walk2Eat">
+      <span class="brand-text">Walk<span class="brand-two">2</span>Eat</span>
+    </a>
+    <a class="btn btn-ghost" href="index.html">← Indietro</a>
+  </div>
+
+  <div style="max-width:400px;margin:32px auto 0">
+    <div class="card">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:2.5rem;margin-bottom:8px">👋</div>
+        <h2 style="font-size:1.3rem">Benvenuto!</h2>
+        <p class="small">Accedi o crea il tuo profilo</p>
+      </div>
+
+      <div class="form-grid" style="grid-template-columns:1fr">
+        <div class="form-group">
+          <label for="name">Il tuo nome</label>
+          <input id="name" class="input" placeholder="Es. Gian-Andrea" autocomplete="given-name">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" class="input" type="email" placeholder="nome@email.com" autocomplete="email">
+        </div>
+        <button id="go" class="btn btn-primary btn-block">
+          Continua →
+        </button>
+      </div>
+
+      <p class="small mt-md text-center">Prototype: autenticazione locale (localStorage)</p>
+    </div>
+  </div>
+
+</div>
+
+<script src="assets/js/routes-poc-data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+document.getElementById('go').onclick = function() {
+  var n = document.getElementById('name').value.trim();
+  var e = document.getElementById('email').value.trim();
+  if (!n || !e) { alert('Inserisci nome e email'); return; }
+  LBW.setUser({ name: n, email: e });
+  location.href = 'dashboard.html';
+};
+// Enter key submit
+document.getElementById('email').addEventListener('keydown', function(ev) {
+  if (ev.key === 'Enter') document.getElementById('go').click();
+});
+</script>
+</body>
+</html>

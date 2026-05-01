@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>Impostazioni • Walk2Eat</title>
+  <link rel="icon" href="assets/branding-hq/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<div class="container page-enter">
+
+  <div class="top-header">
+    <a class="brand" href="dashboard.html">
+      <img class="brand-logo" src="assets/branding-hq/walk2eat-navbar-dark-128.png" alt="Walk2Eat">
+      <span class="brand-text">Walk<span class="brand-two">2</span>Eat</span>
+    </a>
+  </div>
+
+  <h2 class="section-title" id="prefsTitle">⚙️ Impostazioni</h2>
+
+  <!-- Timing Section -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">⏱ Tempi</span>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="breakMinutes">Pausa massima (min)</label>
+        <select id="breakMinutes">
+          <option>20</option><option>30</option><option>45</option>
+          <option>60</option><option>75</option><option>90</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="walkMinutes">Camminata desiderata (min)</label>
+        <select id="walkMinutes">
+          <option>10</option><option>15</option><option>20</option><option>30</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Food Section -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🍽️ Cibo</span>
+    </div>
+
+    <div class="toggle-row">
+      <div class="checkbox-wrapper-7">
+        <input class="tgl tgl-ios" id="schiscettaCheck" type="checkbox">
+        <label class="tgl-btn" for="schiscettaCheck"></label>
+      </div>
+      <span class="toggle-label">🥡 Ho già la schiscetta</span>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="cuisine">Tipo di cibo</label>
+        <select id="cuisine"><option>Scegli tu</option></select>
+      </div>
+      <div class="form-group">
+        <label for="budget">Budget</label>
+        <select id="budget"><option>$</option><option>$$</option><option>$$$</option></select>
+      </div>
+      <div class="form-group">
+        <label for="diet">Preferenze alimentari</label>
+        <select id="diet">
+          <option value="none">Nessuna</option>
+          <option>Vegetariano</option><option>Vegano</option>
+          <option>Gluten free</option><option>Intolleranza al lattosio</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Walk Section -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🚶 Camminata</span>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="intensity">Intensità</label>
+        <select id="intensity">
+          <option>rilassata</option><option>media</option><option>dinamica</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="goal">Obiettivo pausa</label>
+        <select id="goal">
+          <option>staccare</option><option>muoversi</option>
+          <option>scoprire posti nuovi</option><option>mangiare veloce</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Location Section -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">📍 Posizione</span>
+    </div>
+
+    <div class="toggle-row">
+      <div class="checkbox-wrapper-7">
+        <input class="tgl tgl-ios" id="gpsCheck" type="checkbox">
+        <label class="tgl-btn" for="gpsCheck"></label>
+      </div>
+      <span class="toggle-label">📡 Usa posizione GPS</span>
+    </div>
+
+    <div class="form-group">
+      <label for="address">Indirizzo di partenza</label>
+      <div class="address-wrap">
+        <input id="address" class="input" placeholder="Es. Via Nassa 1, Lugano" autocomplete="off">
+        <div id="addressSuggestions"></div>
+      </div>
+      <div id="geocodeStatus"></div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="btn-row" style="margin-top:16px">
+    <button id="save" class="btn btn-primary" style="flex:2">
+      💾 Salva preferenze
+    </button>
+    <button id="logoutBtn" class="btn btn-danger" style="flex:1">
+      🚪 Logout
+    </button>
+  </div>
+
+  <div style="height:16px"></div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-icon">🏠</span><span>Home</span>
+    </a>
+    <a href="map.html" class="nav-item">
+      <span class="nav-icon">🗺️</span><span>Mappa</span>
+    </a>
+    <a href="favorites.html" class="nav-item">
+      <span class="nav-icon">❤️</span><span>Preferiti</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <span class="nav-icon">📋</span><span>Cronologia</span>
+    </a>
+    <a href="preferences.html" class="nav-item active">
+      <span class="nav-icon">⚙️</span><span>Impostazioni</span>
+    </a>
+  </div>
+</nav>
+
+<script src="assets/js/routes-poc-data.js?v=20260329a"></script>
+<script src="assets/js/config.js?v=20260329a"></script>
+<script src="assets/js/app.js?v=20260329a"></script>
+<script>
+(function() {
+  var user = LBW.getUser();
+  document.getElementById('prefsTitle').textContent = '⚙️ Preferenze ' + (user && user.name ? user.name : '');
+
+  var p = LBW.getPrefs();
+  var breakMinutesEl = document.getElementById('breakMinutes');
+  var walkMinutesEl = document.getElementById('walkMinutes');
+  var budgetEl = document.getElementById('budget');
+  var cuisineEl = document.getElementById('cuisine');
+  var dietEl = document.getElementById('diet');
+  var intensityEl = document.getElementById('intensity');
+  var goalEl = document.getElementById('goal');
+  var schiscettaCheckEl = document.getElementById('schiscettaCheck');
+  var addressEl = document.getElementById('address');
+  var gpsCheckEl = document.getElementById('gpsCheck');
+  var saveEl = document.getElementById('save');
+  var suggestionsEl = document.getElementById('addressSuggestions');
+  var statusEl = document.getElementById('geocodeStatus');
+
+  LBW.DB.cuisines.forEach(function(c) { cuisineEl.innerHTML += '<option>' + c + '</option>'; });
+
+  breakMinutesEl.value = p.breakMinutes;
+  walkMinutesEl.value = p.walkMinutes;
+  budgetEl.value = p.budget;
+  cuisineEl.value = p.cuisine || 'Scegli tu';
+  dietEl.value = p.diet;
+  intensityEl.value = p.intensity;
+  goalEl.value = p.goal;
+  schiscettaCheckEl.checked = (p.mealMode === 'Ho già la schiscetta');
+  gpsCheckEl.checked = (p.location && p.location.label === 'Posizione attuale');
+
+  var currentPos = { lat: p.location.lat, lng: p.location.lng, label: p.location.label || '' };
+
+  if (!gpsCheckEl.checked && p.location.label && p.location.label !== 'Posizione attuale') {
+    addressEl.value = p.location.label;
+    statusEl.className = 'ok';
+    statusEl.textContent = '✓ ' + p.location.label + ' (' + p.location.lat.toFixed(4) + ', ' + p.location.lng.toFixed(4) + ')';
+  }
+
+  function syncAddressMode() {
+    if (gpsCheckEl.checked) {
+      addressEl.value = ''; addressEl.disabled = true;
+      addressEl.placeholder = 'Posizione GPS attiva'; addressEl.style.opacity = '0.5';
+      suggestionsEl.style.display = 'none'; statusEl.textContent = '';
+    } else {
+      addressEl.disabled = false; addressEl.placeholder = 'Es. Via Nassa 1, Lugano';
+      addressEl.style.opacity = '1';
+    }
+  }
+
+  function syncFoodDisabled() {
+    var off = schiscettaCheckEl.checked;
+    [cuisineEl, budgetEl, dietEl].forEach(function(el) {
+      el.disabled = off; el.style.opacity = off ? '0.5' : '1';
+    });
+  }
+
+  syncAddressMode(); syncFoodDisabled();
+  schiscettaCheckEl.onchange = syncFoodDisabled;
+
+  gpsCheckEl.onchange = function() {
+    if (!gpsCheckEl.checked) { syncAddressMode(); return; }
+    if (!navigator.geolocation) { alert('GPS non supportato'); gpsCheckEl.checked = false; syncAddressMode(); return; }
+    statusEl.className = 'loading'; statusEl.textContent = 'Ricerca posizione…';
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude, label: 'Posizione attuale' };
+      statusEl.className = 'ok'; statusEl.textContent = '✓ Posizione GPS acquisita';
+      syncAddressMode();
+    }, function() {
+      alert('Impossibile ottenere la posizione GPS'); gpsCheckEl.checked = false; syncAddressMode();
+      statusEl.textContent = '';
+    }, { enableHighAccuracy: true, timeout: 8000 });
+  };
+
+  var geocodeTimer = null, lastQuery = '';
+
+  function showSuggestions(items) {
+    if (!items || !items.length) { suggestionsEl.style.display = 'none'; return; }
+    suggestionsEl.innerHTML = '';
+    items.forEach(function(item) {
+      var el = document.createElement('div');
+      el.className = 'suggestion-item';
+      el.textContent = item.label;
+      el.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        addressEl.value = item.label;
+        currentPos = { lat: item.lat, lng: item.lng, label: item.label };
+        statusEl.className = 'ok';
+        statusEl.textContent = '✓ ' + item.label + ' (' + item.lat.toFixed(4) + ', ' + item.lng.toFixed(4) + ')';
+        suggestionsEl.style.display = 'none';
+      });
+      suggestionsEl.appendChild(el);
+    });
+    suggestionsEl.style.display = 'block';
+  }
+
+  async function geocode(query) {
+    var orsKey = (window.W2E_CONFIG && window.W2E_CONFIG.orsApiKey) || '';
+    var url = 'https://api.openrouteservice.org/geocode/autocomplete?api_key=' + encodeURIComponent(orsKey) +
+              '&text=' + encodeURIComponent(query) + '&size=5&lang=it';
+    var resp = await fetch(url);
+    if (!resp.ok) throw new Error('Geocoding error ' + resp.status);
+    var data = await resp.json();
+    return (data.features || []).map(function(f) {
+      return { label: f.properties.label || f.properties.name || query, lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] };
+    });
+  }
+
+  addressEl.addEventListener('input', function() {
+    var q = addressEl.value.trim();
+    if (gpsCheckEl.checked || q === lastQuery || q.length < 3) { suggestionsEl.style.display = 'none'; return; }
+    clearTimeout(geocodeTimer);
+    statusEl.className = 'loading'; statusEl.textContent = 'Ricerca…';
+    geocodeTimer = setTimeout(async function() {
+      lastQuery = q;
+      try {
+        var results = await geocode(q);
+        showSuggestions(results);
+        statusEl.textContent = results.length ? '' : 'Nessun risultato';
+        if (!results.length) statusEl.className = 'err';
+      } catch(e) {
+        statusEl.className = 'err'; statusEl.textContent = 'Errore geocoding';
+        suggestionsEl.style.display = 'none';
+      }
+    }, 400);
+  });
+
+  addressEl.addEventListener('blur', function() {
+    setTimeout(function() { suggestionsEl.style.display = 'none'; }, 150);
+  });
+
+  saveEl.onclick = async function() {
+    var mealMode = schiscettaCheckEl.checked ? 'Ho già la schiscetta' : 'Mangio fuori';
+    var locToSave;
+    if (gpsCheckEl.checked) {
+      locToSave = currentPos;
+    } else {
+      var addrVal = addressEl.value.trim();
+      if (addrVal && currentPos.label !== addrVal) {
+        statusEl.className = 'loading'; statusEl.textContent = 'Geocoding…';
+        saveEl.disabled = true;
+        try {
+          var results = await geocode(addrVal);
+          if (results.length) {
+            currentPos = { lat: results[0].lat, lng: results[0].lng, label: results[0].label };
+            statusEl.className = 'ok'; statusEl.textContent = '✓ ' + results[0].label;
+          } else {
+            statusEl.className = 'err'; statusEl.textContent = 'Indirizzo non trovato';
+          }
+        } catch(e) { statusEl.className = 'err'; statusEl.textContent = 'Errore geocoding'; }
+        saveEl.disabled = false;
+      }
+      locToSave = { lat: currentPos.lat, lng: currentPos.lng, label: currentPos.label || addrVal };
+    }
+
+    LBW.setPrefs({
+      breakMinutes: +breakMinutesEl.value, walkMinutes: +walkMinutesEl.value,
+      budget: budgetEl.value, cuisine: cuisineEl.value, diet: dietEl.value,
+      intensity: intensityEl.value, goal: goalEl.value,
+      mood: p.mood || 'Oggi zero sbatti', mealMode: mealMode, location: locToSave
+    });
+    LBW.Store.set('lbw_today', null);
+    location.href = 'dashboard.html';
+  };
+
+  document.getElementById('logoutBtn').onclick = function() {
+    LBW.Store.set('lbw_user', null);
+    window.location.href = 'index.html';
+  };
+})();
+</script>
+</body>
+</html>
