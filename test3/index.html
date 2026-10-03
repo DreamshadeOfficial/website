@@ -4,9 +4,296 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#040507">
   <title>Dreamshade – test3</title>
+  <style>
+    :root {
+      --night-0: #040507;
+      --night-1: #070a10;
+      --night-2: #0d131e;
+      --ink: #eceef3;
+      --mute: #8a92a3;
+      --faint: #565d6c;
+      --line: rgba(236, 238, 243, .18);
+      --ember: #ff6b3d;
+      --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { background: var(--night-0); }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      /* the page gets slightly lighter towards the bottom, never bright */
+      background: linear-gradient(180deg, var(--night-0) 0%, var(--night-1) 55%, var(--night-2) 100%);
+    }
+
+    .wrap { width: min(100% - 48px, 1080px); margin: 0 auto; }
+
+    /* ---------- header ---------- */
+    .top { padding: 28px 0; display: flex; justify-content: space-between; align-items: center; }
+
+    .logo {
+      display: block;
+      width: 190px;
+      aspect-ratio: 1158 / 136;
+      background: var(--ink);
+      -webkit-mask: url(assets/logo.svg) center / contain no-repeat;
+              mask: url(assets/logo.svg) center / contain no-repeat;
+    }
+
+    .tag {
+      font-size: 11px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    /* ---------- signup, main variant ---------- */
+    .signup {
+      position: relative;
+      padding: clamp(96px, 20vh, 200px) 0 clamp(110px, 22vh, 220px);
+      overflow: hidden;
+    }
+
+    /* emblem, barely there */
+    .signup::before {
+      content: "";
+      position: absolute;
+      right: -6%;
+      top: 50%;
+      width: min(52vw, 560px);
+      aspect-ratio: 482 / 562;
+      transform: translateY(-50%);
+      background: var(--ink);
+      opacity: .035;
+      -webkit-mask: url(assets/emblem.svg) center / contain no-repeat;
+              mask: url(assets/emblem.svg) center / contain no-repeat;
+      pointer-events: none;
+    }
+
+    /* horizon: one line of light */
+    .signup::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(160, 185, 255, .55) 50%, transparent);
+      box-shadow: 0 0 60px 14px rgba(70, 105, 210, .16);
+    }
+
+    .signup-inner { position: relative; max-width: 640px; }
+
+    .eyebrow {
+      margin: 0 0 22px;
+      font-size: 11px;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: clamp(34px, 6vw, 60px);
+      line-height: 1.04;
+      font-weight: 500;
+      letter-spacing: -.02em;
+    }
+
+    .lede { margin: 0 0 44px; max-width: 30em; color: var(--mute); font-size: 17px; }
+
+    /* ---------- Kit form, restyled ---------- */
+    .formkit-form { margin: 0; }
+    .formkit-form [data-style] { width: 100%; }
+
+    .formkit-fields {
+      display: flex;
+      align-items: stretch;
+      border-bottom: 1px solid var(--line);
+      transition: border-color .4s ease;
+    }
+    .formkit-fields:focus-within { border-bottom-color: var(--ink); }
+
+    .formkit-field { flex: 1 1 auto; min-width: 0; }
+
+    .formkit-input {
+      width: 100%;
+      padding: 16px 0;
+      border: 0;
+      background: transparent;
+      color: var(--ink) !important;          /* Kit sets inline colours on these */
+      font: inherit;
+      font-size: 18px;
+      border-radius: 0 !important;
+      outline: none;
+    }
+    .formkit-input::placeholder { color: var(--faint); opacity: 1; }
+    .formkit-input:-webkit-autofill {
+      -webkit-text-fill-color: var(--ink);
+      box-shadow: 0 0 0 100px var(--night-1) inset;
+      caret-color: var(--ink);
+    }
+
+    .formkit-submit {
+      position: relative;
+      flex: 0 0 auto;
+      padding: 0 0 0 28px;
+      border: 0;
+      background: transparent !important;
+      color: var(--ink) !important;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 500 !important;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      border-radius: 0 !important;
+      cursor: pointer;
+    }
+    .formkit-submit > span { display: inline-flex; align-items: center; gap: 12px; transition: opacity .2s; }
+    .formkit-submit > span::after {
+      content: "";
+      width: 26px; height: 1px;
+      background: currentColor;
+      transition: width .3s ease, background-color .3s ease;
+    }
+    .formkit-submit:hover > span::after,
+    .formkit-submit:focus-visible > span::after { width: 44px; background: var(--ember); }
+    .formkit-submit:focus-visible { outline: 1px solid var(--line); outline-offset: 6px; }
+
+    /* sending state (Kit toggles data-active) */
+    .formkit-spinner { display: none; }
+    .formkit-submit[data-active] > span { opacity: .35; }
+
+    /* messages injected by Kit */
+    .formkit-alert {
+      list-style: none;
+      margin: 0 0 18px;
+      padding: 0;
+      font-size: 14px;
+    }
+    .formkit-alert:empty { display: none; }
+    .formkit-alert-error { color: var(--ember); }
+    .formkit-alert-success {
+      margin: 0;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--ink);
+      font-size: 18px;
+      color: var(--ink);
+    }
+
+    .note { margin: 16px 0 0; font-size: 12px; color: var(--faint); }
+
+    .formkit-powered-by-convertkit-container { margin-top: 26px; }
+    .formkit-powered-by-convertkit {
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--faint);
+      text-decoration: none;
+      opacity: .7;
+    }
+    .formkit-powered-by-convertkit:hover { opacity: 1; color: var(--mute); }
+
+    /* ---------- footer variant ---------- */
+    .foot { padding: 72px 0 56px; }
+    .foot-grid { display: grid; grid-template-columns: 1fr minmax(280px, 420px); gap: 48px; align-items: end; }
+    .foot h2 { margin: 0 0 6px; font-size: 20px; font-weight: 500; letter-spacing: -.01em; }
+    .foot p { margin: 0; color: var(--mute); font-size: 14px; }
+    .foot .formkit-input { font-size: 15px; padding: 12px 0; }
+    .foot .formkit-powered-by-convertkit-container { margin-top: 14px; }
+    .legal { margin-top: 64px; display: flex; justify-content: space-between; gap: 16px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+
+    @media (max-width: 720px) {
+      .foot-grid { grid-template-columns: 1fr; gap: 28px; }
+      .logo { width: 150px; }
+      .signup::before { right: -30%; width: 90vw; }
+      .legal { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
 </head>
 <body>
-  <p>Dreamshade – test3 (work in progress)</p>
+
+  <header class="wrap top">
+    <a class="logo" href="./" aria-label="Dreamshade"></a>
+    <span class="tag">test3 · preview</span>
+  </header>
+
+  <main>
+    <section class="signup">
+      <div class="wrap">
+        <div class="signup-inner">
+          <p class="eyebrow">Newsletter</p>
+          <h1>Be there when<br>the night begins.</h1>
+          <p class="lede">New music, tour dates and first access, straight from the band. Nothing else.</p>
+
+          <form action="https://app.kit.com/forms/9998362/subscriptions" class="seva-form formkit-form" method="post" data-sv-form="9998362" data-uid="802730aa8b" data-format="inline" data-version="5" data-options="{&quot;settings&quot;:{&quot;after_subscribe&quot;:{&quot;action&quot;:&quot;message&quot;,&quot;success_message&quot;:&quot;You're in. Check your inbox to confirm.&quot;,&quot;redirect_url&quot;:&quot;&quot;},&quot;analytics&quot;:{&quot;google&quot;:null,&quot;fathom&quot;:null,&quot;facebook&quot;:null,&quot;segment&quot;:null,&quot;pinterest&quot;:null,&quot;sparkloop&quot;:null,&quot;googletagmanager&quot;:null},&quot;modal&quot;:{&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;powered_by&quot;:{&quot;show&quot;:true,&quot;url&quot;:&quot;https://kit.com/features/forms?utm_campaign=poweredby&amp;utm_content=form&amp;utm_medium=referral&amp;utm_source=dynamic&quot;},&quot;recaptcha&quot;:{&quot;enabled&quot;:false},&quot;return_visitor&quot;:{&quot;action&quot;:&quot;show&quot;,&quot;custom_content&quot;:&quot;&quot;},&quot;slide_in&quot;:{&quot;display_in&quot;:&quot;bottom_right&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;sticky_bar&quot;:{&quot;display_in&quot;:&quot;top&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15}},&quot;version&quot;:&quot;5&quot;}">
+            <div data-style="clean">
+              <ul class="formkit-alert formkit-alert-error" data-element="errors" data-group="alert"></ul>
+              <div data-element="fields" data-stacked="false" class="seva-fields formkit-fields">
+                <div class="formkit-field">
+                  <input class="formkit-input" name="email_address" aria-label="Email address" placeholder="Your email" required type="email" autocomplete="email">
+                </div>
+                <button data-element="submit" class="formkit-submit">
+                  <div class="formkit-spinner"><div></div><div></div><div></div></div>
+                  <span>Join</span>
+                </button>
+              </div>
+              <p class="note">You'll get one email to confirm. Unsubscribe anytime.</p>
+              <div class="formkit-powered-by-convertkit-container">
+                <a href="https://kit.com/features/forms?utm_campaign=poweredby&amp;utm_content=form&amp;utm_medium=referral&amp;utm_source=dynamic" data-element="powered-by" class="formkit-powered-by-convertkit" target="_blank" rel="nofollow noopener">Built with Kit</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <h2>Stay in the loop</h2>
+          <p>The compact version, for the bottom of the page.</p>
+        </div>
+
+        <form action="https://app.kit.com/forms/9998362/subscriptions" class="seva-form formkit-form" method="post" data-sv-form="9998362" data-uid="802730aa8b" data-format="inline" data-version="5" data-options="{&quot;settings&quot;:{&quot;after_subscribe&quot;:{&quot;action&quot;:&quot;message&quot;,&quot;success_message&quot;:&quot;You're in. Check your inbox to confirm.&quot;,&quot;redirect_url&quot;:&quot;&quot;},&quot;analytics&quot;:{&quot;google&quot;:null,&quot;fathom&quot;:null,&quot;facebook&quot;:null,&quot;segment&quot;:null,&quot;pinterest&quot;:null,&quot;sparkloop&quot;:null,&quot;googletagmanager&quot;:null},&quot;modal&quot;:{&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;powered_by&quot;:{&quot;show&quot;:true,&quot;url&quot;:&quot;https://kit.com/features/forms?utm_campaign=poweredby&amp;utm_content=form&amp;utm_medium=referral&amp;utm_source=dynamic&quot;},&quot;recaptcha&quot;:{&quot;enabled&quot;:false},&quot;return_visitor&quot;:{&quot;action&quot;:&quot;show&quot;,&quot;custom_content&quot;:&quot;&quot;},&quot;slide_in&quot;:{&quot;display_in&quot;:&quot;bottom_right&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;sticky_bar&quot;:{&quot;display_in&quot;:&quot;top&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15}},&quot;version&quot;:&quot;5&quot;}">
+          <div data-style="clean">
+            <ul class="formkit-alert formkit-alert-error" data-element="errors" data-group="alert"></ul>
+            <div data-element="fields" data-stacked="false" class="seva-fields formkit-fields">
+              <div class="formkit-field">
+                <input class="formkit-input" name="email_address" aria-label="Email address" placeholder="Your email" required type="email" autocomplete="email">
+              </div>
+              <button data-element="submit" class="formkit-submit">
+                <div class="formkit-spinner"><div></div><div></div><div></div></div>
+                <span>Join</span>
+              </button>
+            </div>
+            <div class="formkit-powered-by-convertkit-container">
+              <a href="https://kit.com/features/forms?utm_campaign=poweredby&amp;utm_content=form&amp;utm_medium=referral&amp;utm_source=dynamic" data-element="powered-by" class="formkit-powered-by-convertkit" target="_blank" rel="nofollow noopener">Built with Kit</a>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="legal">
+        <span>© Dreamshade</span>
+        <span>Work in progress, not the final site</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://f.convertkit.com/ckjs/ck.5.js"></script>
 </body>
 </html>
