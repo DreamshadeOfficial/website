@@ -38,6 +38,7 @@
     a { color: inherit; }
     img { display: block; max-width: 100%; height: auto; }
     .wrap { width: min(100% - 48px, 1080px); margin: 0 auto; }
+    [id] { scroll-margin-top: 92px; } /* keep anchors clear of the sticky bar */
 
     /* ---------- header ---------- */
     .top {
@@ -60,6 +61,23 @@
       text-decoration: none; color: var(--mute);
     }
     .nav a:hover, .nav a:focus-visible { color: var(--ink); }
+
+    .burger {
+      display: none;
+      width: 44px; height: 44px; margin-right: -10px; padding: 0;
+      border: 0; background: transparent; cursor: pointer; position: relative;
+    }
+    .burger span {
+      position: absolute; left: 10px; right: 10px; height: 1px;
+      background: var(--ink);
+      transition: transform .3s ease, opacity .2s ease;
+    }
+    .burger span:nth-child(1) { top: 15px; }
+    .burger span:nth-child(2) { top: 22px; }
+    .burger span:nth-child(3) { top: 29px; }
+    .menu-open .burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .menu-open .burger span:nth-child(2) { opacity: 0; }
+    .menu-open .burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
     /* ---------- shared ---------- */
     section { padding: clamp(72px, 12vh, 130px) 0; position: relative; }
@@ -204,8 +222,20 @@
       .single, .album, .band, .contact { grid-template-columns: 1fr; gap: 32px; }
       .singles { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
       .logo { width: 132px; }
-      .nav { gap: 4px 14px; }
-      .nav a { font-size: 10px; letter-spacing: .14em; }
+      .burger { display: block; }
+      .nav {
+        position: fixed; inset: 0; z-index: -1;
+        flex-direction: column; flex-wrap: nowrap; justify-content: center; align-items: flex-start;
+        gap: 6px; padding: 96px 24px 40px;
+        background: var(--night-0);
+        opacity: 0; visibility: hidden;
+        transition: opacity .3s ease, visibility .3s;
+      }
+      .nav a { font-size: 30px; letter-spacing: -.01em; text-transform: none; color: var(--ink); padding: 8px 0; }
+      .menu-open .nav { opacity: 1; visibility: visible; }
+      .menu-open { overflow: hidden; }
+      /* blur on the bar would trap the fixed menu inside it */
+      .top { backdrop-filter: none; background: rgba(4, 5, 7, .94); }
       .downloads li { grid-template-columns: 1fr; }
       .dl { justify-content: flex-start; }
       .legal { flex-direction: column; }
@@ -218,7 +248,8 @@
   <header class="top">
     <div class="wrap top-inner">
       <a class="logo" href="#top" aria-label="Dreamshade"></a>
-      <nav class="nav" aria-label="Main">
+      <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav"><span></span><span></span><span></span></button>
+      <nav class="nav" id="nav" aria-label="Main">
         <a href="#music">Music</a>
         <a href="#album">Album</a>
         <a href="#tour">Tour</a>
@@ -465,6 +496,17 @@
       if (!el || !el.dataset.release) return;
       var nights = Math.ceil((new Date(el.dataset.release + 'T00:00:00') - new Date()) / 86400000);
       el.textContent = nights > 0 ? nights : 0;
+    })();
+  </script>
+  <script>
+    // mobile menu
+    (function () {
+      var btn = document.querySelector('.burger'), nav = document.getElementById('nav'), root = document.documentElement;
+      function set(open) { root.classList.toggle('menu-open', open); btn.setAttribute('aria-expanded', open); }
+      btn.addEventListener('click', function () { set(!root.classList.contains('menu-open')); });
+      nav.addEventListener('click', function (e) { if (e.target.tagName === 'A') set(false); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+      window.matchMedia('(min-width: 761px)').addEventListener('change', function () { set(false); });
     })();
   </script>
   <script charset="utf-8" src="https://widget.bandsintown.com/main.min.js"></script>
