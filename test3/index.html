@@ -6,273 +6,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#040507">
   <title>Dreamshade – test3</title>
-  <style>
-    :root {
-      --night-0: #040507;
-      --night-1: #070a10;
-      --night-2: #0b101a;
-      --night-3: #101724;
-      --night-4: #161f2f;
-      --ink: #eceef3;
-      --mute: #8a92a3;
-      --faint: #5b6272;
-      --line: rgba(236, 238, 243, .16);
-      --ember: #ff6b3d;
-      --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    }
-
-    * { box-sizing: border-box; }
-    html { background: var(--night-0); scroll-behavior: smooth; }
-
-    body {
-      margin: 0;
-      color: var(--ink);
-      font-family: var(--sans);
-      font-size: 16px;
-      line-height: 1.55;
-      -webkit-font-smoothing: antialiased;
-      /* one night: the page gets lighter on the way down, never bright */
-      background: linear-gradient(180deg, var(--night-0) 0%, var(--night-1) 22%, var(--night-2) 48%, var(--night-3) 74%, var(--night-4) 100%);
-    }
-
-    a { color: inherit; }
-    img { display: block; max-width: 100%; height: auto; }
-    .wrap { width: min(100% - 48px, 1080px); margin: 0 auto; }
-    [id] { scroll-margin-top: 92px; } /* keep anchors clear of the sticky bar */
-
-    /* ---------- header ---------- */
-    .top {
-      position: sticky; top: 0; z-index: 10;
-      background: rgba(4, 5, 7, .82);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(236, 238, 243, .06);
-    }
-    .top-inner { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 18px 0; }
-    .logo {
-      display: block; flex: 0 0 auto;
-      width: 170px; aspect-ratio: 1158 / 136;
-      background: var(--ink);
-      -webkit-mask: url(assets/logo.svg) center / contain no-repeat;
-              mask: url(assets/logo.svg) center / contain no-repeat;
-    }
-    .nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 22px; }
-    .nav a {
-      font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
-      text-decoration: none; color: var(--mute);
-    }
-    .nav a:hover, .nav a:focus-visible { color: var(--ink); }
-
-    .burger {
-      display: none;
-      width: 44px; height: 44px; margin-right: -10px; padding: 0;
-      border: 0; background: transparent; cursor: pointer; position: relative;
-    }
-    .burger span {
-      position: absolute; left: 10px; right: 10px; height: 1px;
-      background: var(--ink);
-      transition: transform .3s ease, opacity .2s ease;
-    }
-    .burger span:nth-child(1) { top: 15px; }
-    .burger span:nth-child(2) { top: 22px; }
-    .burger span:nth-child(3) { top: 29px; }
-    .menu-open .burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .menu-open .burger span:nth-child(2) { opacity: 0; }
-    .menu-open .burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-    /* ---------- shared ---------- */
-    section { padding: clamp(72px, 12vh, 130px) 0; position: relative; }
-    .eyebrow { margin: 0 0 20px; font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: var(--mute); }
-    h1, h2, h3 { margin: 0; font-weight: 500; letter-spacing: -.02em; }
-    h1 { font-size: clamp(38px, 7vw, 76px); line-height: 1.02; }
-    h2 { font-size: clamp(28px, 4.4vw, 46px); line-height: 1.08; }
-    h3 { font-size: 20px; letter-spacing: -.01em; }
-    p { margin: 0; }
-    .lede { color: var(--mute); max-width: 34em; }
-
-    .btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-    .btn {
-      display: inline-block; padding: 13px 22px;
-      border: 1px solid var(--line);
-      font-size: 12px; letter-spacing: .22em; text-transform: uppercase; text-decoration: none;
-      color: var(--ink);
-    }
-    .btn:hover, .btn:focus-visible { border-color: var(--ink); }
-    .btn.solid { background: var(--ink); color: var(--night-0); border-color: var(--ink); }
-
-    /* placeholders: everything dashed is not final */
-    .ph {
-      display: flex; align-items: center; justify-content: center;
-      border: 1px dashed rgba(236, 238, 243, .28);
-      background: rgba(236, 238, 243, .025);
-      color: var(--faint);
-      font-size: 11px; letter-spacing: .2em; text-transform: uppercase; text-align: center;
-      padding: 20px;
-    }
-    .ph-tag {
-      display: inline-block; margin-left: 10px; padding: 2px 8px;
-      border: 1px dashed rgba(236, 238, 243, .28);
-      font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint);
-      vertical-align: middle; white-space: nowrap;
-    }
-    .horizon { height: 1px; background: linear-gradient(90deg, transparent, rgba(160, 185, 255, .5) 50%, transparent); box-shadow: 0 0 60px 14px rgba(70, 105, 210, .14); }
-
-    /* ---------- zone 1: opening ---------- */
-    .hero { padding: 0; }
-    .hero-photo { min-height: min(86vh, 820px); align-items: flex-start; border-width: 0 0 1px; }
-    .hero-photo span { margin-top: 28px; }
-    .hero-copy { position: absolute; left: 0; right: 0; bottom: clamp(40px, 9vh, 96px); }
-
-    /* ---------- zone 2: music ---------- */
-    .single { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; align-items: center; margin-top: 40px; }
-    .video { aspect-ratio: 16 / 9; }
-    .links { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--line); }
-    .links li { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
-    .links span:last-child { color: var(--faint); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; }
-    .singles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
-    .singles .ph { aspect-ratio: 1; }
-    .singles p { margin-top: 10px; font-size: 13px; color: var(--mute); }
-
-    /* ---------- zone 3: album ---------- */
-    .album { display: grid; grid-template-columns: minmax(240px, 420px) 1fr; gap: 56px; align-items: center; }
-    .album .ph { aspect-ratio: 1; }
-    .nights { margin: 30px 0 0; display: flex; align-items: baseline; gap: 14px; }
-    .nights b { font-size: clamp(56px, 9vw, 104px); line-height: .9; font-weight: 500; letter-spacing: -.04em; }
-    .nights span { font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
-
-    .signup { margin-top: clamp(72px, 12vh, 120px); padding-top: clamp(56px, 9vh, 96px); border-top: 1px solid var(--line); max-width: 640px; }
-    .signup h2 { margin-bottom: 14px; }
-    .signup .lede { margin-bottom: 36px; }
-
-    /* Kit form, restyled */
-    .formkit-form { margin: 0; }
-    .formkit-fields { display: flex; align-items: stretch; border-bottom: 1px solid var(--line); transition: border-color .4s ease; }
-    .formkit-fields:focus-within { border-bottom-color: var(--ink); }
-    .formkit-field { flex: 1 1 auto; min-width: 0; }
-    .formkit-input {
-      width: 100%; padding: 16px 0; border: 0; background: transparent;
-      color: var(--ink) !important; font: inherit; font-size: 18px;
-      border-radius: 0 !important; outline: none;
-    }
-    .formkit-input::placeholder { color: var(--faint); opacity: 1; }
-    .formkit-input:-webkit-autofill { -webkit-text-fill-color: var(--ink); box-shadow: 0 0 0 100px var(--night-2) inset; caret-color: var(--ink); }
-    .formkit-submit {
-      position: relative; flex: 0 0 auto; padding: 0 0 0 28px; border: 0;
-      background: transparent !important; color: var(--ink) !important;
-      font: inherit; font-size: 12px; font-weight: 500 !important;
-      letter-spacing: .24em; text-transform: uppercase; border-radius: 0 !important; cursor: pointer;
-    }
-    .formkit-submit > span { display: inline-flex; align-items: center; gap: 12px; transition: opacity .2s; }
-    .formkit-submit > span::after { content: ""; width: 26px; height: 1px; background: currentColor; transition: width .3s ease, background-color .3s ease; }
-    .formkit-submit:hover > span::after, .formkit-submit:focus-visible > span::after { width: 44px; background: var(--ember); }
-    .formkit-submit:focus-visible { outline: 1px solid var(--line); outline-offset: 6px; }
-    .formkit-spinner { display: none; }
-    .formkit-submit[data-active] > span { opacity: .35; }
-    .formkit-alert { list-style: none; margin: 0 0 18px; padding: 0; font-size: 14px; }
-    .formkit-alert:empty { display: none; }
-    .formkit-alert-error { color: var(--ember); }
-    .formkit-alert-success { margin: 0; padding: 16px 0; border-bottom: 1px solid var(--ink); font-size: 18px; color: var(--ink); }
-    .note { margin: 16px 0 0; font-size: 12px; color: var(--faint); }
-    .formkit-powered-by-convertkit-container { margin-top: 22px; }
-    .formkit-powered-by-convertkit { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); text-decoration: none; opacity: .7; }
-    .formkit-powered-by-convertkit:hover { opacity: 1; color: var(--mute); }
-
-    /* ---------- zone 4: tour ---------- */
-    .tour-widget { margin-top: 36px; min-height: 180px; }
-
-    /* ---------- zone 5: band, catalogue, press, contact ---------- */
-    .band { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; margin-top: 40px; }
-    .band .ph { aspect-ratio: 4 / 3; }
-    .bio p + p { margin-top: 1em; }
-    .bio { color: #c5cad6; }
-    .lineup { list-style: none; margin: 28px 0 0; padding: 0; border-top: 1px solid var(--line); }
-    .lineup li { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
-    .lineup span:last-child { color: var(--mute); font-size: 14px; text-align: right; }
-
-    .sub { margin-top: clamp(72px, 11vh, 120px); }
-    .sub > .lede { margin-top: 10px; }
-
-    .releases { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 22px 16px; }
-    .releases a, .releases div { display: block; text-decoration: none; }
-    .releases img { width: 100%; aspect-ratio: 1; object-fit: cover; opacity: .82; transition: opacity .3s; }
-    .releases a:hover img, .releases a:focus-visible img { opacity: 1; }
-    .rel-title { display: block; margin-top: 9px; font-size: 12px; line-height: 1.3; }
-    .rel-meta { display: block; font-size: 11px; color: var(--faint); }
-
-    .strip-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
-    .strip-nav { display: flex; gap: 8px; }
-    .strip-nav button {
-      width: 40px; height: 40px; border: 1px solid var(--line); background: transparent;
-      color: var(--ink); font: inherit; font-size: 16px; cursor: pointer;
-    }
-    .strip-nav button:hover, .strip-nav button:focus-visible { border-color: var(--ink); }
-    .strip {
-      list-style: none; margin: 28px 0 0; padding: 0 0 14px;
-      display: flex; gap: 18px;
-      overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
-      scrollbar-width: thin; scrollbar-color: var(--line) transparent;
-    }
-    .strip li { flex: 0 0 min(78vw, 440px); scroll-snap-align: start; }
-    .vid {
-      display: block; position: relative; width: 100%; aspect-ratio: 16 / 9;
-      padding: 0; border: 0; background: #000; cursor: pointer; overflow: hidden;
-    }
-    .vid img { width: 100%; height: 100%; object-fit: cover; opacity: .78; transition: opacity .3s; }
-    .vid:hover img, .vid:focus-visible img { opacity: 1; }
-    .vid::after {
-      content: ""; position: absolute; left: 50%; top: 50%;
-      width: 0; height: 0; margin: -12px 0 0 -8px;
-      border-style: solid; border-width: 12px 0 12px 20px;
-      border-color: transparent transparent transparent var(--ink);
-      filter: drop-shadow(0 0 10px rgba(0, 0, 0, .7));
-    }
-    .vid iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-    .vid.playing { cursor: default; }
-    .vid.playing::after { display: none; }
-
-    .downloads { list-style: none; margin: 32px 0 0; padding: 0; border-top: 1px solid var(--line); }
-    .downloads li { display: grid; grid-template-columns: 1fr auto; gap: 8px 24px; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--line); }
-    .downloads small { display: block; color: var(--mute); font-size: 13px; }
-    .dl { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
-    .dl a, .dl span {
-      padding: 7px 12px; border: 1px solid var(--line);
-      font-size: 11px; letter-spacing: .16em; text-transform: uppercase; text-decoration: none;
-    }
-    .dl a:hover, .dl a:focus-visible { border-color: var(--ink); }
-    .dl span { border-style: dashed; color: var(--faint); }
-
-    .contact { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
-    .contact a.mail { font-size: clamp(18px, 2.4vw, 24px); text-decoration: none; border-bottom: 1px solid var(--line); }
-    .contact a.mail:hover { border-bottom-color: var(--ink); }
-    .social { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 26px; }
-    .social a { font-size: 13px; letter-spacing: .18em; text-transform: uppercase; text-decoration: none; color: var(--mute); }
-    .social a:hover, .social a:focus-visible { color: var(--ink); }
-
-    .legal { margin-top: 90px; padding-bottom: 40px; display: flex; justify-content: space-between; gap: 16px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
-
-    @media (max-width: 760px) {
-      .single, .album, .band, .contact { grid-template-columns: 1fr; gap: 32px; }
-      .singles { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-      .logo { width: 132px; }
-      .burger { display: block; }
-      .nav {
-        position: fixed; inset: 0; z-index: -1;
-        flex-direction: column; flex-wrap: nowrap; justify-content: center; align-items: flex-start;
-        gap: 6px; padding: 96px 24px 40px;
-        background: var(--night-0);
-        opacity: 0; visibility: hidden;
-        transition: opacity .3s ease, visibility .3s;
-      }
-      .nav a { font-size: 30px; letter-spacing: -.01em; text-transform: none; color: var(--ink); padding: 8px 0; }
-      .menu-open .nav { opacity: 1; visibility: visible; }
-      .menu-open { overflow: hidden; }
-      /* blur on the bar would trap the fixed menu inside it */
-      .top { backdrop-filter: none; background: rgba(4, 5, 7, .94); }
-      .downloads li { grid-template-columns: 1fr; }
-      .dl { justify-content: flex-start; }
-      .legal { flex-direction: column; }
-    }
-    @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
-  </style>
+  <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
 
@@ -284,9 +18,9 @@
         <a href="#music">Music</a>
         <a href="#album">Album</a>
         <a href="#tour">Tour</a>
+        <a href="#merch">Merch</a>
         <a href="#band">Band</a>
         <a href="#videos">Videos</a>
-        <a href="#press">Press</a>
         <a href="#contact">Contact</a>
       </nav>
     </div>
@@ -352,31 +86,6 @@
             </div>
           </div>
         </div>
-
-        <div class="signup" id="newsletter">
-          <p class="eyebrow">Newsletter</p>
-          <h2>Be there when the night begins.</h2>
-          <p class="lede">New music, tour dates and first access, straight from the band. Nothing else.</p>
-
-          <form action="https://app.kit.com/forms/9998362/subscriptions" class="seva-form formkit-form" method="post" data-sv-form="9998362" data-uid="802730aa8b" data-format="inline" data-version="5" data-options="{&quot;settings&quot;:{&quot;after_subscribe&quot;:{&quot;action&quot;:&quot;message&quot;,&quot;success_message&quot;:&quot;You're in. Check your inbox to confirm.&quot;,&quot;redirect_url&quot;:&quot;&quot;},&quot;analytics&quot;:{&quot;google&quot;:null,&quot;fathom&quot;:null,&quot;facebook&quot;:null,&quot;segment&quot;:null,&quot;pinterest&quot;:null,&quot;sparkloop&quot;:null,&quot;googletagmanager&quot;:null},&quot;modal&quot;:{&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;powered_by&quot;:{&quot;show&quot;:true,&quot;url&quot;:&quot;https://kit.com/features/forms?utm_campaign=poweredby&amp;utm_content=form&amp;utm_medium=referral&amp;utm_source=dynamic&quot;},&quot;recaptcha&quot;:{&quot;enabled&quot;:false},&quot;return_visitor&quot;:{&quot;action&quot;:&quot;show&quot;,&quot;custom_content&quot;:&quot;&quot;},&quot;slide_in&quot;:{&quot;display_in&quot;:&quot;bottom_right&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;sticky_bar&quot;:{&quot;display_in&quot;:&quot;top&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15}},&quot;version&quot;:&quot;5&quot;}">
-              <div data-style="clean">
-                <ul class="formkit-alert formkit-alert-error" data-element="errors" data-group="alert"></ul>
-                <div data-element="fields" data-stacked="false" class="seva-fields formkit-fields">
-                  <div class="formkit-field">
-                    <input class="formkit-input" name="email_address" aria-label="Email address" placeholder="Your email" required type="email" autocomplete="email">
-                  </div>
-                  <button data-element="submit" class="formkit-submit">
-                    <div class="formkit-spinner"><div></div><div></div><div></div></div>
-                    <span>Join</span>
-                  </button>
-                </div>
-                <p class="note">You'll get one email to confirm. Unsubscribe anytime.</p>
-                <div class="formkit-powered-by-convertkit-container">
-                  <a href="https://kit.com/features/forms?utm_campaign=poweredby&amp;utm_content=form&amp;utm_medium=referral&amp;utm_source=dynamic" data-element="powered-by" class="formkit-powered-by-convertkit" target="_blank" rel="nofollow noopener">Built with Kit</a>
-                </div>
-              </div>
-            </form>
-        </div>
       </div>
     </section>
 
@@ -406,6 +115,15 @@
       </div>
     </section>
 
+    <section id="merch">
+      <div class="wrap">
+        <div>
+          <p class="eyebrow">Merch <span class="ph-tag">placeholder</span></p>
+          <div class="ph" style="min-height:140px">Store to come</div>
+        </div>
+      </div>
+    </section>
+
     <!-- zone 5 -->
     <section id="band">
       <div class="wrap">
@@ -425,29 +143,6 @@
               <li><span>Francesco Ferrini</span><span>Drums</span></li>
             </ul>
           </div>
-        </div>
-
-        <div class="sub" id="discography">
-          <p class="eyebrow">Discography</p>
-          <h3>2008 – 2023</h3>
-          <ul class="releases">
-          <li><a href="https://ffm.to/dsandzardonic" target="_blank" rel="noopener"><img src="assets/covers/2023_grey-days-peace-of-mind-mix.jpg" alt="Grey Days (Peace of Mind Mix) cover" width="480" height="480" loading="lazy"><span class="rel-title">Grey Days (Peace of Mind Mix)</span><span class="rel-meta">Remix · 2023</span></a></li>
-          <li><a href="https://ffm.to/greydaysep" target="_blank" rel="noopener"><img src="assets/covers/2022_grey-days.jpg" alt="Grey Days cover" width="480" height="480" loading="lazy"><span class="rel-title">Grey Days</span><span class="rel-meta">EP · 2022</span></a></li>
-          <li><a href="https://ffm.to/dreamshaderise" target="_blank" rel="noopener"><img src="assets/covers/2022_rise.jpg" alt="Rise cover" width="480" height="480" loading="lazy"><span class="rel-title">Rise</span><span class="rel-meta">Single · 2022</span></a></li>
-          <li><a href="https://ffm.to/apalebluedot" target="_blank" rel="noopener"><img src="assets/covers/2021_a-pale-blue-dot.jpg" alt="A Pale Blue Dot cover" width="480" height="480" loading="lazy"><span class="rel-title">A Pale Blue Dot</span><span class="rel-meta">Album · 2021</span></a></li>
-          <li><a href="https://ffm.to/nothingbutthetruth" target="_blank" rel="noopener"><img src="assets/covers/2021_nothing-but-the-truth-feat-john-henry.jpg" alt="Nothing But The Truth (feat. John Henry) cover" width="480" height="480" loading="lazy"><span class="rel-title">Nothing But The Truth (feat. John Henry)</span><span class="rel-meta">Single · 2021</span></a></li>
-          <li><a href="https://ffm.to/stonecolddigital" target="_blank" rel="noopener"><img src="assets/covers/2021_stone-cold-digital-feat-rose-villain.jpg" alt="Stone Cold Digital (feat. Rose Villain) cover" width="480" height="480" loading="lazy"><span class="rel-title">Stone Cold Digital (feat. Rose Villain)</span><span class="rel-meta">Single · 2021</span></a></li>
-          <li><div><img src="assets/covers/2021_shanghai-nights.jpg" alt="Shanghai Nights cover" width="480" height="480" loading="lazy"><span class="rel-title">Shanghai Nights</span><span class="rel-meta">Single · 2021</span></div></li>
-          <li><div><img src="assets/covers/2020_lightbringers.jpg" alt="Lightbringers cover" width="480" height="480" loading="lazy"><span class="rel-title">Lightbringers</span><span class="rel-meta">Single · 2020</span></div></li>
-          <li><div><img src="assets/covers/2019_question-everything.jpg" alt="Question Everything cover" width="480" height="480" loading="lazy"><span class="rel-title">Question Everything</span><span class="rel-meta">Single · 2019</span></div></li>
-          <li><div><img src="assets/covers/2018_lost-in-the-echo.jpg" alt="Lost In The Echo cover" width="480" height="480" loading="lazy"><span class="rel-title">Lost In The Echo</span><span class="rel-meta">Single · 2018</span></div></li>
-          <li><div><img src="assets/covers/2018_on-my-own.jpg" alt="On My Own cover" width="480" height="480" loading="lazy"><span class="rel-title">On My Own</span><span class="rel-meta">Single · 2018</span></div></li>
-          <li><div><img src="assets/covers/2016_vibrant.jpg" alt="Vibrant cover" width="480" height="480" loading="lazy"><span class="rel-title">Vibrant</span><span class="rel-meta">Album · 2016</span></div></li>
-          <li><div><img src="assets/covers/2015_dreamers-don-t-sleep.jpg" alt="Dreamers Don&#x27;t Sleep cover" width="480" height="480" loading="lazy"><span class="rel-title">Dreamers Don&#x27;t Sleep</span><span class="rel-meta">Single · 2015</span></div></li>
-          <li><div><img src="assets/covers/2013_the-gift-of-life.jpg" alt="The Gift Of Life cover" width="480" height="480" loading="lazy"><span class="rel-title">The Gift Of Life</span><span class="rel-meta">Album · 2013</span></div></li>
-          <li><div><img src="assets/covers/2011_what-silence-hides.jpg" alt="What Silence Hides cover" width="480" height="480" loading="lazy"><span class="rel-title">What Silence Hides</span><span class="rel-meta">Album · 2011</span></div></li>
-          <li><div><img src="assets/covers/2008_to-the-edge-of-reality.jpg" alt="To The Edge Of Reality cover" width="480" height="480" loading="lazy"><span class="rel-title">To The Edge Of Reality</span><span class="rel-meta">EP · 2008</span></div></li>
-          </ul>
         </div>
 
         <div class="sub" id="videos">
@@ -489,50 +184,52 @@
           </ul>
         </div>
 
-        <div class="sub" id="press">
-          <p class="eyebrow">Press</p>
-          <h3>Press kit</h3>
-          <ul class="downloads">
-            <li>
-              <div>Band photos<small>New pictures, medium and high resolution</small></div>
-              <div class="dl"><span>Medium · to come</span><span>High-res · to come</span></div>
-            </li>
-            <li>
-              <div>Biography<small>PDF</small></div>
-              <div class="dl"><span>PDF · to come</span></div>
-            </li>
-            <li>
-              <div>Album press release<small>PDF</small></div>
-              <div class="dl"><span>PDF · to come</span></div>
-            </li>
-            <li>
-              <div>Logo<small>Black and white, PNG and vector PDF</small></div>
-              <div class="dl">
-                <a href="press/dreamshade-logo-black.png" download>PNG black</a>
-                <a href="press/dreamshade-logo-white.png" download>PNG white</a>
-                <a href="press/dreamshade-logo-black.pdf" download>PDF black</a>
-                <a href="press/dreamshade-logo-white.pdf" download>PDF white</a>
-              </div>
-            </li>
-            <li>
-              <div>Emblem<small>Black and white, PNG and vector AI</small></div>
-              <div class="dl">
-                <a href="press/dreamshade-emblem-black.png" download>PNG black</a>
-                <a href="press/dreamshade-emblem-white.png" download>PNG white</a>
-                <a href="press/dreamshade-emblem-black.ai" download>AI black</a>
-                <a href="press/dreamshade-emblem-white.ai" download>AI white</a>
-              </div>
-            </li>
-            <li>
-              <div>Logo and emblem, all files<small>ZIP, 8 files</small></div>
-              <div class="dl"><a href="press/dreamshade-logo-kit.zip" download>Download ZIP</a></div>
-            </li>
+        <div class="sub" id="discography">
+          <p class="eyebrow">Discography</p>
+          <h3>2008 – 2023</h3>
+          <ul class="releases">
+          <li><a href="https://ffm.to/dsandzardonic" target="_blank" rel="noopener"><img src="assets/covers/2023_grey-days-peace-of-mind-mix.jpg" alt="Grey Days (Peace of Mind Mix) cover" width="480" height="480" loading="lazy"><span class="rel-title">Grey Days (Peace of Mind Mix)</span><span class="rel-meta">Remix · 2023</span></a></li>
+          <li><a href="https://ffm.to/greydaysep" target="_blank" rel="noopener"><img src="assets/covers/2022_grey-days.jpg" alt="Grey Days cover" width="480" height="480" loading="lazy"><span class="rel-title">Grey Days</span><span class="rel-meta">EP · 2022</span></a></li>
+          <li><a href="https://ffm.to/dreamshaderise" target="_blank" rel="noopener"><img src="assets/covers/2022_rise.jpg" alt="Rise cover" width="480" height="480" loading="lazy"><span class="rel-title">Rise</span><span class="rel-meta">Single · 2022</span></a></li>
+          <li><a href="https://ffm.to/apalebluedot" target="_blank" rel="noopener"><img src="assets/covers/2021_a-pale-blue-dot.jpg" alt="A Pale Blue Dot cover" width="480" height="480" loading="lazy"><span class="rel-title">A Pale Blue Dot</span><span class="rel-meta">Album · 2021</span></a></li>
+          <li><a href="https://ffm.to/nothingbutthetruth" target="_blank" rel="noopener"><img src="assets/covers/2021_nothing-but-the-truth-feat-john-henry.jpg" alt="Nothing But The Truth (feat. John Henry) cover" width="480" height="480" loading="lazy"><span class="rel-title">Nothing But The Truth (feat. John Henry)</span><span class="rel-meta">Single · 2021</span></a></li>
+          <li><a href="https://ffm.to/stonecolddigital" target="_blank" rel="noopener"><img src="assets/covers/2021_stone-cold-digital-feat-rose-villain.jpg" alt="Stone Cold Digital (feat. Rose Villain) cover" width="480" height="480" loading="lazy"><span class="rel-title">Stone Cold Digital (feat. Rose Villain)</span><span class="rel-meta">Single · 2021</span></a></li>
+          <li><div><img src="assets/covers/2021_shanghai-nights.jpg" alt="Shanghai Nights cover" width="480" height="480" loading="lazy"><span class="rel-title">Shanghai Nights</span><span class="rel-meta">Single · 2021</span></div></li>
+          <li><div><img src="assets/covers/2020_lightbringers.jpg" alt="Lightbringers cover" width="480" height="480" loading="lazy"><span class="rel-title">Lightbringers</span><span class="rel-meta">Single · 2020</span></div></li>
+          <li><div><img src="assets/covers/2019_question-everything.jpg" alt="Question Everything cover" width="480" height="480" loading="lazy"><span class="rel-title">Question Everything</span><span class="rel-meta">Single · 2019</span></div></li>
+          <li><div><img src="assets/covers/2018_lost-in-the-echo.jpg" alt="Lost In The Echo cover" width="480" height="480" loading="lazy"><span class="rel-title">Lost In The Echo</span><span class="rel-meta">Single · 2018</span></div></li>
+          <li><div><img src="assets/covers/2018_on-my-own.jpg" alt="On My Own cover" width="480" height="480" loading="lazy"><span class="rel-title">On My Own</span><span class="rel-meta">Single · 2018</span></div></li>
+          <li><div><img src="assets/covers/2016_vibrant.jpg" alt="Vibrant cover" width="480" height="480" loading="lazy"><span class="rel-title">Vibrant</span><span class="rel-meta">Album · 2016</span></div></li>
+          <li><div><img src="assets/covers/2015_dreamers-don-t-sleep.jpg" alt="Dreamers Don&#x27;t Sleep cover" width="480" height="480" loading="lazy"><span class="rel-title">Dreamers Don&#x27;t Sleep</span><span class="rel-meta">Single · 2015</span></div></li>
+          <li><div><img src="assets/covers/2013_the-gift-of-life.jpg" alt="The Gift Of Life cover" width="480" height="480" loading="lazy"><span class="rel-title">The Gift Of Life</span><span class="rel-meta">Album · 2013</span></div></li>
+          <li><div><img src="assets/covers/2011_what-silence-hides.jpg" alt="What Silence Hides cover" width="480" height="480" loading="lazy"><span class="rel-title">What Silence Hides</span><span class="rel-meta">Album · 2011</span></div></li>
+          <li><div><img src="assets/covers/2008_to-the-edge-of-reality.jpg" alt="To The Edge Of Reality cover" width="480" height="480" loading="lazy"><span class="rel-title">To The Edge Of Reality</span><span class="rel-meta">EP · 2008</span></div></li>
           </ul>
         </div>
 
-        <div class="sub" id="merch">
-          <p class="eyebrow">Merch <span class="ph-tag">placeholder</span></p>
-          <div class="ph" style="min-height:140px">Store to come</div>
+        <div class="sub signup" id="newsletter">
+          <p class="eyebrow">Newsletter</p>
+          <h2>Be there when the night begins.</h2>
+          <p class="lede">New music, tour dates and first access, straight from the band. Nothing else.</p>
+
+          <form action="https://app.kit.com/forms/9998362/subscriptions" class="seva-form formkit-form" method="post" data-sv-form="9998362" data-uid="802730aa8b" data-format="inline" data-version="5" data-options="{&quot;settings&quot;:{&quot;after_subscribe&quot;:{&quot;action&quot;:&quot;message&quot;,&quot;success_message&quot;:&quot;You're in. Check your inbox to confirm.&quot;,&quot;redirect_url&quot;:&quot;&quot;},&quot;analytics&quot;:{&quot;google&quot;:null,&quot;fathom&quot;:null,&quot;facebook&quot;:null,&quot;segment&quot;:null,&quot;pinterest&quot;:null,&quot;sparkloop&quot;:null,&quot;googletagmanager&quot;:null},&quot;modal&quot;:{&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;powered_by&quot;:{&quot;show&quot;:true,&quot;url&quot;:&quot;https://kit.com/features/forms?utm_campaign=poweredby&amp;utm_content=form&amp;utm_medium=referral&amp;utm_source=dynamic&quot;},&quot;recaptcha&quot;:{&quot;enabled&quot;:false},&quot;return_visitor&quot;:{&quot;action&quot;:&quot;show&quot;,&quot;custom_content&quot;:&quot;&quot;},&quot;slide_in&quot;:{&quot;display_in&quot;:&quot;bottom_right&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15},&quot;sticky_bar&quot;:{&quot;display_in&quot;:&quot;top&quot;,&quot;trigger&quot;:&quot;timer&quot;,&quot;scroll_percentage&quot;:null,&quot;timer&quot;:5,&quot;devices&quot;:&quot;all&quot;,&quot;show_once_every&quot;:15}},&quot;version&quot;:&quot;5&quot;}">
+              <div data-style="clean">
+                <ul class="formkit-alert formkit-alert-error" data-element="errors" data-group="alert"></ul>
+                <div data-element="fields" data-stacked="false" class="seva-fields formkit-fields">
+                  <div class="formkit-field">
+                    <input class="formkit-input" name="email_address" aria-label="Email address" placeholder="Your email" required type="email" autocomplete="email">
+                  </div>
+                  <button data-element="submit" class="formkit-submit">
+                    <div class="formkit-spinner"><div></div><div></div><div></div></div>
+                    <span>Join</span>
+                  </button>
+                </div>
+                <p class="note">You'll get one email to confirm. Unsubscribe anytime.</p>
+                <div class="formkit-powered-by-convertkit-container">
+                  <a href="https://kit.com/features/forms?utm_campaign=poweredby&amp;utm_content=form&amp;utm_medium=referral&amp;utm_source=dynamic" data-element="powered-by" class="formkit-powered-by-convertkit" target="_blank" rel="nofollow noopener">Built with Kit</a>
+                </div>
+              </div>
+            </form>
         </div>
 
         <div class="sub contact" id="contact">
@@ -554,6 +251,7 @@
 
         <div class="legal">
           <span>© Dreamshade</span>
+          <span><a href="press/">Press kit</a></span>
           <span>test3 · work in progress, dashed boxes are placeholders</span>
         </div>
       </div>
