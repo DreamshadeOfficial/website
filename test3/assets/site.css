@@ -130,9 +130,8 @@ p { margin: 0; }
 .nights b { font-size: clamp(56px, 9vw, 104px); line-height: .9; font-weight: 500; letter-spacing: -.04em; }
 .nights span { font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
 
-.signup { max-width: 640px; }
+.signup { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: end; }
 .signup h2 { margin-bottom: 14px; }
-.signup .lede { margin-bottom: 36px; }
 
 /* Kit form, restyled */
 .formkit-form { margin: 0; }
@@ -243,7 +242,7 @@ p { margin: 0; }
 .legal { margin-top: 90px; padding-bottom: 40px; display: flex; justify-content: space-between; gap: 16px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
 
 @media (max-width: 760px) {
-  .single, .album, .band, .contact { grid-template-columns: 1fr; gap: 32px; }
+  .single, .album, .band, .contact, .signup { grid-template-columns: 1fr; gap: 32px; }
   .singles { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   .logo { width: 132px; }
   .burger { display: block; }
