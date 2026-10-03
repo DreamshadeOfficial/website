@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#040507">
   <title>Dreamshade – test3</title>
-  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/site.css?v=202610040025">
 </head>
 <body>
 
@@ -184,6 +184,37 @@
           </ul>
         </div>
 
+        <div class="sub" id="discography">
+          <div class="strip-head">
+            <div>
+              <p class="eyebrow">Discography</p>
+              <h3>2008 – 2023</h3>
+            </div>
+            <div class="strip-nav">
+              <button type="button" data-dir="-1" aria-label="Previous releases">←</button>
+              <button type="button" data-dir="1" aria-label="Next releases">→</button>
+            </div>
+          </div>
+          <ul class="strip covers">
+            <li><a href="https://ffm.to/dsandzardonic" target="_blank" rel="noopener"><img src="assets/covers/2023_grey-days-peace-of-mind-mix.jpg" alt="Grey Days (Peace of Mind Mix) cover" width="480" height="480" loading="lazy"><span class="rel-title">Grey Days (Peace of Mind Mix)</span><span class="rel-meta">Remix · 2023</span></a></li>
+            <li><a href="https://ffm.to/greydaysep" target="_blank" rel="noopener"><img src="assets/covers/2022_grey-days.jpg" alt="Grey Days cover" width="480" height="480" loading="lazy"><span class="rel-title">Grey Days</span><span class="rel-meta">EP · 2022</span></a></li>
+            <li><a href="https://ffm.to/dreamshaderise" target="_blank" rel="noopener"><img src="assets/covers/2022_rise.jpg" alt="Rise cover" width="480" height="480" loading="lazy"><span class="rel-title">Rise</span><span class="rel-meta">Single · 2022</span></a></li>
+            <li><a href="https://ffm.to/apalebluedot" target="_blank" rel="noopener"><img src="assets/covers/2021_a-pale-blue-dot.jpg" alt="A Pale Blue Dot cover" width="480" height="480" loading="lazy"><span class="rel-title">A Pale Blue Dot</span><span class="rel-meta">Album · 2021</span></a></li>
+            <li><a href="https://ffm.to/nothingbutthetruth" target="_blank" rel="noopener"><img src="assets/covers/2021_nothing-but-the-truth-feat-john-henry.jpg" alt="Nothing But The Truth (feat. John Henry) cover" width="480" height="480" loading="lazy"><span class="rel-title">Nothing But The Truth (feat. John Henry)</span><span class="rel-meta">Single · 2021</span></a></li>
+            <li><a href="https://ffm.to/stonecolddigital" target="_blank" rel="noopener"><img src="assets/covers/2021_stone-cold-digital-feat-rose-villain.jpg" alt="Stone Cold Digital (feat. Rose Villain) cover" width="480" height="480" loading="lazy"><span class="rel-title">Stone Cold Digital (feat. Rose Villain)</span><span class="rel-meta">Single · 2021</span></a></li>
+            <li><div><img src="assets/covers/2021_shanghai-nights.jpg" alt="Shanghai Nights cover" width="480" height="480" loading="lazy"><span class="rel-title">Shanghai Nights</span><span class="rel-meta">Single · 2021</span></div></li>
+            <li><div><img src="assets/covers/2020_lightbringers.jpg" alt="Lightbringers cover" width="480" height="480" loading="lazy"><span class="rel-title">Lightbringers</span><span class="rel-meta">Single · 2020</span></div></li>
+            <li><div><img src="assets/covers/2019_question-everything.jpg" alt="Question Everything cover" width="480" height="480" loading="lazy"><span class="rel-title">Question Everything</span><span class="rel-meta">Single · 2019</span></div></li>
+            <li><div><img src="assets/covers/2018_lost-in-the-echo.jpg" alt="Lost In The Echo cover" width="480" height="480" loading="lazy"><span class="rel-title">Lost In The Echo</span><span class="rel-meta">Single · 2018</span></div></li>
+            <li><div><img src="assets/covers/2018_on-my-own.jpg" alt="On My Own cover" width="480" height="480" loading="lazy"><span class="rel-title">On My Own</span><span class="rel-meta">Single · 2018</span></div></li>
+            <li><div><img src="assets/covers/2016_vibrant.jpg" alt="Vibrant cover" width="480" height="480" loading="lazy"><span class="rel-title">Vibrant</span><span class="rel-meta">Album · 2016</span></div></li>
+            <li><div><img src="assets/covers/2015_dreamers-don-t-sleep.jpg" alt="Dreamers Don&#x27;t Sleep cover" width="480" height="480" loading="lazy"><span class="rel-title">Dreamers Don&#x27;t Sleep</span><span class="rel-meta">Single · 2015</span></div></li>
+            <li><div><img src="assets/covers/2013_the-gift-of-life.jpg" alt="The Gift Of Life cover" width="480" height="480" loading="lazy"><span class="rel-title">The Gift Of Life</span><span class="rel-meta">Album · 2013</span></div></li>
+            <li><div><img src="assets/covers/2011_what-silence-hides.jpg" alt="What Silence Hides cover" width="480" height="480" loading="lazy"><span class="rel-title">What Silence Hides</span><span class="rel-meta">Album · 2011</span></div></li>
+            <li><div><img src="assets/covers/2008_to-the-edge-of-reality.jpg" alt="To The Edge Of Reality cover" width="480" height="480" loading="lazy"><span class="rel-title">To The Edge Of Reality</span><span class="rel-meta">EP · 2008</span></div></li>
+          </ul>
+        </div>
+
         <div class="sub signup" id="newsletter">
           <div class="signup-text">
             <p class="eyebrow">Newsletter</p>
@@ -259,11 +290,9 @@
     })();
   </script>
   <script>
-    // video strip: YouTube loads only when a thumbnail is clicked
+    // strips: arrows scroll; YouTube loads only when a thumbnail is clicked
     (function () {
-      var strip = document.querySelector('.strip');
-      if (!strip) return;
-      strip.addEventListener('click', function (e) {
+      document.addEventListener('click', function (e) {
         var b = e.target.closest('.vid');
         if (!b || b.classList.contains('playing')) return;
         var f = document.createElement('iframe');
@@ -276,8 +305,11 @@
       });
       document.querySelectorAll('.strip-nav button').forEach(function (n) {
         n.addEventListener('click', function () {
-          var w = strip.querySelector('li').offsetWidth + 18;
-          strip.scrollBy({ left: w * Number(n.dataset.dir) });
+          var strip = n.closest('.sub').querySelector('.strip');
+          var gap = parseFloat(getComputedStyle(strip).columnGap) || 0;
+          var w = strip.querySelector('li').offsetWidth + gap;
+          var per = Math.max(1, Math.floor(strip.clientWidth / w));
+          strip.scrollBy({ left: w * per * Number(n.dataset.dir) });
         });
       });
     })();
