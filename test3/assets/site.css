@@ -341,25 +341,25 @@ body::after { inset: -120px; }
 /* ---------- ambient layer: something is always moving behind the page ---------- */
 .ambient { position: fixed; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
 /* --amb goes 0 → 1 while the opening photo scrolls away; --sp is the scroll progress of the whole page */
-.amb-emblem {
-  position: absolute; right: -8vw; top: 50%;
-  width: min(78vh, 62vw); aspect-ratio: 482 / 562;
-  opacity: calc(var(--amb, 0) * .085);
-  transform: translateY(calc(-50% + (0.5 - var(--sp, 0)) * 34vh)) rotate(calc(-9deg + var(--sp, 0) * 20deg));
+/* the photo fills the screen, much larger than the window, so it can wander without showing its edges */
+.amb-photo {
+  position: absolute; inset: -18vh -14vw;
+  opacity: calc(var(--amb, 0) * .5);
+  mix-blend-mode: screen;
+  transform: translateY(calc((0.5 - var(--sp, 0)) * 22vh));
 }
-.amb-emblem div {
+.amb-photo div {
   width: 100%; height: 100%;
-  background: var(--ink);
-  -webkit-mask: url(emblem.svg) center / contain no-repeat;
-          mask: url(emblem.svg) center / contain no-repeat;
+  background: url(photos/hero-1400.jpg) 50% 42% / cover no-repeat;
+  filter: blur(3px) saturate(1.15);
 }
 .amb-light { position: absolute; border-radius: 50%; filter: blur(70px); mix-blend-mode: screen; opacity: calc(.35 + var(--amb, 0) * .65); }
 .amb-a { width: 46vw; height: 46vw; left: -12vw; top: 8vh; background: radial-gradient(circle, rgba(46, 163, 190, .26), rgba(46, 163, 190, 0) 68%); }
 .amb-b { width: 38vw; height: 38vw; right: -8vw; bottom: -6vh; background: radial-gradient(circle, rgba(34, 96, 150, .34), rgba(34, 96, 150, 0) 68%); }
 .amb-c { width: 16vw; height: 16vw; left: 58vw; top: 22vh; background: radial-gradient(circle, rgba(217, 72, 44, .22), rgba(217, 72, 44, 0) 70%); }
 
-.motion .amb-emblem div { animation: float 22s ease-in-out infinite alternate; }
-@keyframes float { from { transform: translate(-2.5%, -3%) rotate(-2.5deg) scale(1); } to { transform: translate(2.5%, 3.5%) rotate(3deg) scale(1.06); } }
+.motion .amb-photo div { animation: wander 38s ease-in-out infinite alternate; }
+@keyframes wander { from { transform: translate(-5%, -4%) scale(1.05) rotate(-1.5deg); } to { transform: translate(5%, 5%) scale(1.22) rotate(2deg); } }
 .motion .amb-a { animation: drift-a 34s ease-in-out infinite alternate; }
 .motion .amb-b { animation: drift-b 41s ease-in-out infinite alternate; }
 .motion .amb-c { animation: drift-c 27s ease-in-out infinite alternate; }
@@ -368,7 +368,7 @@ body::after { inset: -120px; }
 @keyframes drift-c { from { transform: translate(0, 0) scale(1); } to { transform: translate(-44vw, 48vh) scale(1.9); } }
 
 @media (max-width: 760px) {
-  .amb-emblem { width: 120vw; right: -42vw; }
+  .amb-photo { inset: -12vh -30vw; }
   .amb-a { width: 90vw; height: 90vw; } .amb-b { width: 80vw; height: 80vw; } .amb-c { width: 40vw; height: 40vw; }
 }
 
