@@ -375,6 +375,11 @@ body::after { inset: -120px; }
   .amb-a { width: 90vw; height: 90vw; } .amb-b { width: 80vw; height: 80vw; } .amb-c { width: 40vw; height: 40vw; }
 }
 
+/* level 2: the ambient photo is drawn in WebGL (assets/motion.js) instead of the CSS one */
+.amb-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: none; opacity: calc(var(--amb, 0) * .62); mix-blend-mode: screen; }
+.ambient-gl .amb-canvas { display: block; }
+.ambient-gl .amb-photo { display: none; }
+
 /* demo-only switch */
 .motion-switch {
   position: fixed; right: 14px; bottom: 14px; z-index: 60;

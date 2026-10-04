@@ -1,7 +1,8 @@
 // Motion for the test3 demo.
 // Level 1: slow breathing zoom, scroll parallax on the opening photo, sections fading in, living grain,
 //          and an ambient layer (emblem + drifting lights) that keeps moving behind the whole page.
-// Level 2: depth effect on the opening photo (WebGL): the picture shifts with the pointer, more where it is closer.
+// Level 2: depth effect on the opening photo (WebGL): the picture shifts with the pointer, more where it is closer;
+//          and the ambient layer becomes a WebGL canvas with one photo per zone (see "ambient" below).
 // The small switch in the corner is only there to compare the levels; it is not part of the site.
 (function () {
   var root = document.documentElement;
@@ -154,10 +155,191 @@
     };
   })();
 
+  /* ---------- ambient background in WebGL: one photo per zone, never still ---------- */
+  // rotation and zoom (time + scroll), liquid distortion, mirror shards, colour split and stretch on fast scroll,
+  // pointer / phone tilt, random flashes, cross-fade between photos as the zones go by
+  var ambient = (function () {
+    var holder = document.querySelector('.ambient');
+    if (!holder) return null;
+    var canvas = document.createElement('canvas');
+    canvas.className = 'amb-canvas';
+    var gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
+    if (!gl) return null;
+    holder.insertBefore(canvas, holder.firstChild);
+
+    // which photo sits behind which part of the page (id of the block where it takes over)
+    var zones = [
+      { id: 'music', src: 'assets/photos/bg-1.jpg' },
+      { id: 'album', src: 'assets/photos/bg-2.jpg' },
+      { id: 'tour', src: 'assets/photos/bg-3.jpg' },
+      { id: 'band', src: 'assets/photos/bg-4.jpg' },
+      { id: 'videos', src: 'assets/photos/bg-5.jpg' },
+      { id: 'newsletter', src: 'assets/photos/bg-6.jpg' }
+    ];
+
+    var vs = 'attribute vec2 p; varying vec2 v; void main(){ v = p * .5 + .5; v.y = 1. - v.y; gl_Position = vec4(p, 0., 1.); }';
+    var fs = [
+      'precision highp float;',
+      'varying vec2 v;',
+      'uniform sampler2D A, B;',
+      'uniform float mixAB, aspA, aspB, ca, t, sp, vel, flash;',
+      'uniform vec2 ptr;',
+      'vec2 hash2(vec2 p){ p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))); return fract(sin(p) * 43758.5453); }',
+      'mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }',
+      // p is in "square" space (x scaled by the canvas aspect); returns texture uv with cover fit and mirrored edges
+      'vec2 fit(vec2 p, float asp){',
+      '  vec2 q = p; q.x /= ca;',
+      '  vec2 s = ca > asp ? vec2(1., asp / ca) : vec2(ca / asp, 1.);',
+      '  q = q * s + .5;',
+      '  return abs(mod(q - 1., 2.) - 1.);',
+      '}',
+      'vec3 pic(vec2 p){ return mix(texture2D(A, fit(p, aspA)).rgb, texture2D(B, fit(p, aspB)).rgb, mixAB); }',
+      'void main(){',
+      '  vec2 p = v - .5; p.x *= ca;',
+      // mirror shards: voronoi cells, each one shifted, turned and zoomed on its own
+      '  vec2 g = p * 2.4 + vec2(0., t * .02);',
+      '  vec2 cell = floor(g), id = cell; float d1 = 9., d2 = 9.;',
+      '  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {',
+      '    vec2 c = cell + vec2(float(i), float(j));',
+      '    vec2 h = hash2(c);',
+      '    vec2 pt = c + .5 + .47 * sin(t * .35 + 6.2831 * h) + (h - .5) * .5;',
+      '    float d = distance(g, pt);',
+      '    if (d < d1) { d2 = d1; d1 = d; id = c; } else if (d < d2) { d2 = d; }',
+      '  }',
+      '  vec2 r = hash2(id + 7.) - .5;',
+      '  float shard = .45 + .35 * sin(t * .21) + vel * 1.4;',
+      '  float edge = smoothstep(.07, .0, d2 - d1);',
+      // whole picture: turns and breathes with time, turns and comes closer with scroll, follows the pointer
+      '  float ang = -.3 + sp * .9 + sin(t * .31) * .16 + r.x * shard * .5;',
+      '  float zoom = 1.3 + .3 * sin(t * .47) + sp * .35 + r.y * shard * .35;',
+      '  vec2 q = rot(ang) * p / zoom;',
+      '  q += ptr * .09 + r * shard * .13;',
+      // liquid: the surface ripples, harder when scrolling fast
+      '  float amp = .014 + vel * .07;',
+      '  q += amp * vec2(sin(q.y * 9. + t * 1.1) + sin(q.y * 23. - t * 1.7) * .4, cos(q.x * 8. - t * .9) + cos(q.x * 19. + t * 1.3) * .4);',
+      '  q.y *= 1. - vel * .35;',
+      // colour split along the scroll direction and on flashes
+      '  vec2 off = vec2(.004, .012) * (vel * 2.2 + flash * 1.5 + .12);',
+      '  vec3 col = vec3(pic(q + off).r, pic(q).g, pic(q - off).b);',
+      '  col += edge * shard * vec3(.25, .5, .58) * .55;',
+      '  float lum = dot(col, vec3(.3, .59, .11));',
+      '  col *= mix(1., .5, smoothstep(.25, .9, lum));',   // bright photos are held back so the text stays readable
+      '  col = col * (1. + flash * 1.7) + flash * vec3(.08, .13, .15);',
+      '  float vig = smoothstep(1.25, .25, length(p));',
+      '  gl_FragColor = vec4(col * mix(.55, 1., vig), 1.);',
+      '}'
+    ].join('\n');
+    function sh(type, src) { var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
+    var prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs));
+    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { canvas.remove(); return null; }
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    var U = {};
+    ['A', 'B', 'mixAB', 'aspA', 'aspB', 'ca', 't', 'sp', 'vel', 'flash', 'ptr'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+    gl.uniform1i(U.A, 0); gl.uniform1i(U.B, 1);
+
+    function makeTexture(image) {
+      var tx = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, tx);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+      return tx;
+    }
+
+    var ready = false, running = false, tops = [];
+    var cur = { x: 0, y: 0 }, ptr = { x: 0, y: 0 };
+    var lastY = window.scrollY, vel = 0, flash = 0, nextFlash = 4000;
+
+    function resize() {
+      // rendered small on purpose: it is a soft background, and it keeps phones cool
+      var k = Math.min(window.devicePixelRatio || 1, 1.5) * 0.6;
+      canvas.width = Math.max(2, Math.round(window.innerWidth * k));
+      canvas.height = Math.max(2, Math.round(window.innerHeight * k));
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.uniform1f(U.ca, canvas.width / canvas.height);
+      tops = zones.map(function (z) {
+        var el = document.getElementById(z.id);
+        return el ? el.getBoundingClientRect().top + window.scrollY : 0;
+      });
+    }
+
+    function frame(now) {
+      if (!running) return;
+      requestAnimationFrame(frame);
+      var y = window.scrollY, vh = window.innerHeight;
+      // how fast the page is moving, smoothed; 1 = a hard flick
+      var raw = Math.min(1, Math.abs(y - lastY) / 70);
+      lastY = y;
+      vel += (raw - vel) * (raw > vel ? 0.35 : 0.06);
+      // flashes: every few seconds on their own, and when the scroll is violent
+      if (now > nextFlash || (raw > 0.92 && flash < 0.2)) { flash = 1; nextFlash = now + 5000 + Math.random() * 7000; }
+      flash *= 0.88;
+      // which two photos, and how far between them
+      var mid = y + vh * 0.5, i = 0;
+      for (var k = 0; k < tops.length; k++) if (mid >= tops[k]) i = k;
+      var j = Math.min(i + 1, zones.length - 1);
+      var fade = vh * 0.55, m = 0;
+      if (j !== i) m = Math.max(0, Math.min(1, (mid - (tops[j] - fade)) / fade));
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, zones[i].tex);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, zones[j].tex);
+      gl.uniform1f(U.aspA, zones[i].asp); gl.uniform1f(U.aspB, zones[j].asp);
+      gl.uniform1f(U.mixAB, m * m * (3 - 2 * m));
+      cur.x += (ptr.x - cur.x) * 0.06; cur.y += (ptr.y - cur.y) * 0.06;
+      gl.uniform2f(U.ptr, -cur.x, -cur.y);
+      var max = document.documentElement.scrollHeight - vh;
+      gl.uniform1f(U.sp, max > 0 ? y / max : 0);
+      gl.uniform1f(U.t, now / 1000);
+      gl.uniform1f(U.vel, vel);
+      gl.uniform1f(U.flash, flash);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    window.addEventListener('pointermove', function (e) {
+      if (e.pointerType === 'touch') return;
+      ptr.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      ptr.y = (e.clientY / window.innerHeight - 0.5) * 2;
+    }, { passive: true });
+    // phones: tilt, where the browser gives it without asking
+    window.addEventListener('deviceorientation', function (e) {
+      if (e.gamma == null) return;
+      ptr.x = Math.max(-1, Math.min(1, e.gamma / 30));
+      ptr.y = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+    }, { passive: true });
+    window.addEventListener('resize', function () { if (ready) resize(); });
+    window.addEventListener('load', function () { if (ready) resize(); });
+
+    function load(src) {
+      return new Promise(function (ok, ko) { var i = new Image(); i.onload = function () { ok(i); }; i.onerror = ko; i.src = src; });
+    }
+
+    return {
+      start: function () {
+        if (running) return;
+        var go = function () { running = true; root.classList.add('ambient-gl'); resize(); requestAnimationFrame(frame); };
+        if (ready) return go();
+        Promise.all(zones.map(function (z) { return load(z.src); })).then(function (imgs) {
+          imgs.forEach(function (im, n) { zones[n].tex = makeTexture(im); zones[n].asp = im.naturalWidth / im.naturalHeight; });
+          ready = true; go();
+        }).catch(function () {});
+      },
+      stop: function () { running = false; root.classList.remove('ambient-gl'); }
+    };
+  })();
+
   /* ---------- switch between levels (demo only) ---------- */
   var labels = { off: 'Movimento: spento', one: 'Movimento: 1', two: 'Movimento: 1 + 2' };
-  var order = depth ? ['two', 'one', 'off'] : ['one', 'off'];
-  if (!depth && mode === 'two') mode = 'one';
+  var order = (depth || ambient) ? ['two', 'one', 'off'] : ['one', 'off'];
+  if (!depth && !ambient && mode === 'two') mode = 'one';
   var btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'motion-switch';
@@ -166,6 +348,7 @@
   function apply() {
     root.classList.toggle('motion', mode !== 'off');
     if (mode === 'two' && depth) depth.start(); else if (depth) depth.stop();
+    if (mode === 'two' && ambient) ambient.start(); else if (ambient) ambient.stop();
     btn.textContent = labels[mode];
     onScroll();
     try { sessionStorage.setItem('motion', mode); } catch (e) {}
