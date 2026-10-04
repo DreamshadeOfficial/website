@@ -224,7 +224,7 @@
       '  col += edge * shard * vec3(.25, .5, .58) * .55;',
       '  float lum = dot(col, vec3(.3, .59, .11));',
       '  col *= mix(1., .5, smoothstep(.25, .9, lum));',   // bright photos are held back so the text stays readable
-      '  col = col * (1. + flash * 1.7) + flash * vec3(.08, .13, .15);',
+      '  col = col * (1. + flash * 2.2) + flash * vec3(.30, .44, .48);',   // added light, so the flash shows on dark photos too
       '  float vig = smoothstep(1.25, .25, length(p));',
       '  gl_FragColor = vec4(col * mix(.55, 1., vig), 1.);',
       '}'
@@ -284,7 +284,7 @@
       vel += (raw - vel) * (raw > vel ? 0.35 : 0.06);
       // flashes: every few seconds on their own, and when the scroll is violent
       if (now > nextFlash || (raw > 0.92 && flash < 0.2)) { flash = 1; nextFlash = now + 5000 + Math.random() * 7000; }
-      flash *= 0.88;
+      flash *= 0.93;
       // which two photos, and how far between them
       var mid = y + vh * 0.5, i = 0;
       for (var k = 0; k < tops.length; k++) if (mid >= tops[k]) i = k;
