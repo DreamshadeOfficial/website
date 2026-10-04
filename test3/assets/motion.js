@@ -182,7 +182,7 @@
       'precision highp float;',
       'varying vec2 v;',
       'uniform sampler2D A, B;',
-      'uniform float mixAB, aspA, aspB, ca, t, sp, vel, flash;',
+      'uniform float mixAB, aspA, aspB, ca, t, sp, vel, flash, shardOn, liquidOn;',
       'uniform vec2 ptr;',
       'vec2 hash2(vec2 p){ p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))); return fract(sin(p) * 43758.5453); }',
       'mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }',
@@ -207,7 +207,7 @@
       '    if (d < d1) { d2 = d1; d1 = d; id = c; } else if (d < d2) { d2 = d; }',
       '  }',
       '  vec2 r = hash2(id + 7.) - .5;',
-      '  float shard = .45 + .35 * sin(t * .21) + vel * 1.4;',
+      '  float shard = (.45 + .35 * sin(t * .21) + vel * 1.4) * shardOn;',
       '  float edge = smoothstep(.07, .0, d2 - d1);',
       // whole picture: turns and breathes with time, turns and comes closer with scroll, follows the pointer
       '  float ang = -.3 + sp * .9 + sin(t * .31) * .16 + r.x * shard * .5;',
@@ -215,7 +215,7 @@
       '  vec2 q = rot(ang) * p / zoom;',
       '  q += ptr * .09 + r * shard * .13;',
       // liquid: the surface ripples, harder when scrolling fast
-      '  float amp = .014 + vel * .07;',
+      '  float amp = (.014 + vel * .07) * liquidOn;',
       '  q += amp * vec2(sin(q.y * 9. + t * 1.1) + sin(q.y * 23. - t * 1.7) * .4, cos(q.x * 8. - t * .9) + cos(q.x * 19. + t * 1.3) * .4);',
       '  q.y *= 1. - vel * .35;',
       // colour split along the scroll direction and on flashes
@@ -242,7 +242,7 @@
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     var U = {};
-    ['A', 'B', 'mixAB', 'aspA', 'aspB', 'ca', 't', 'sp', 'vel', 'flash', 'ptr'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+    ['A', 'B', 'mixAB', 'aspA', 'aspB', 'ca', 't', 'sp', 'vel', 'flash', 'ptr', 'shardOn', 'liquidOn'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
     gl.uniform1i(U.A, 0); gl.uniform1i(U.B, 1);
 
     function makeTexture(image) {
@@ -259,6 +259,7 @@
     var ready = false, running = false, tops = [];
     var cur = { x: 0, y: 0 }, ptr = { x: 0, y: 0 };
     var lastY = window.scrollY, vel = 0, flash = 0, nextFlash = 4000;
+    var opts = { shards: true, liquid: true };
 
     function resize() {
       // rendered small on purpose: it is a soft background, and it keeps phones cool
@@ -301,6 +302,8 @@
       gl.uniform1f(U.t, now / 1000);
       gl.uniform1f(U.vel, vel);
       gl.uniform1f(U.flash, flash);
+      gl.uniform1f(U.shardOn, opts.shards ? 1 : 0);
+      gl.uniform1f(U.liquidOn, opts.liquid ? 1 : 0);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 
@@ -332,7 +335,8 @@
           ready = true; go();
         }).catch(function () {});
       },
-      stop: function () { running = false; root.classList.remove('ambient-gl'); }
+      stop: function () { running = false; root.classList.remove('ambient-gl'); },
+      opts: opts
     };
   })();
 
@@ -340,16 +344,39 @@
   var labels = { off: 'Movimento: spento', one: 'Movimento: 1', two: 'Movimento: 1 + 2' };
   var order = (depth || ambient) ? ['two', 'one', 'off'] : ['one', 'off'];
   if (!depth && !ambient && mode === 'two') mode = 'one';
-  var btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'motion-switch';
-  document.body.appendChild(btn);
+  var panel = document.createElement('div');
+  panel.className = 'motion-switch';
+  document.body.appendChild(panel);
+  function button() { var b = document.createElement('button'); b.type = 'button'; panel.appendChild(b); return b; }
+  var btn = button();
+  // the two effects of the WebGL background that can be judged on their own
+  var toggles = [
+    { key: 'shards', label: 'Specchio', el: button() },
+    { key: 'liquid', label: 'Liquido', el: button() }
+  ];
+  toggles.forEach(function (tg) {
+    try { var saved = sessionStorage.getItem('motion-' + tg.key); if (saved && ambient) ambient.opts[tg.key] = saved === '1'; } catch (e) {}
+    tg.el.addEventListener('click', function () {
+      if (!ambient) return;
+      ambient.opts[tg.key] = !ambient.opts[tg.key];
+      try { sessionStorage.setItem('motion-' + tg.key, ambient.opts[tg.key] ? '1' : '0'); } catch (e) {}
+      apply();
+    });
+  });
 
   function apply() {
     root.classList.toggle('motion', mode !== 'off');
     if (mode === 'two' && depth) depth.start(); else if (depth) depth.stop();
     if (mode === 'two' && ambient) ambient.start(); else if (ambient) ambient.stop();
     btn.textContent = labels[mode];
+    toggles.forEach(function (tg) {
+      var usable = ambient && mode === 'two';
+      tg.el.hidden = !usable;
+      if (usable) {
+        tg.el.textContent = tg.label + ': ' + (ambient.opts[tg.key] ? 'on' : 'off');
+        tg.el.setAttribute('aria-pressed', ambient.opts[tg.key]);
+      }
+    });
     onScroll();
     try { sessionStorage.setItem('motion', mode); } catch (e) {}
   }
