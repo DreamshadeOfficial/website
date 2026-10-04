@@ -1,5 +1,6 @@
 // Motion for the test3 demo.
-// Level 1: slow breathing zoom, scroll parallax on the opening photo, sections fading in, living grain.
+// Level 1: slow breathing zoom, scroll parallax on the opening photo, sections fading in, living grain,
+//          and an ambient layer (emblem + drifting lights) that keeps moving behind the whole page.
 // Level 2: depth effect on the opening photo (WebGL): the picture shifts with the pointer, more where it is closer.
 // The small switch in the corner is only there to compare the levels; it is not part of the site.
 (function () {
@@ -29,8 +30,12 @@
     ticking = true;
     requestAnimationFrame(function () {
       ticking = false;
-      var y = mode === 'off' ? 0 : Math.min(window.scrollY, hero.offsetHeight) * 0.22;
+      var y = mode === 'off' ? 0 : Math.min(window.scrollY, hero.offsetHeight) * 0.3;
       media.style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0)';
+      // ambient layer: fades in as the opening photo leaves, then follows the scroll of the whole page
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      root.style.setProperty('--amb', Math.min(1, window.scrollY / (hero.offsetHeight * 0.7)).toFixed(3));
+      root.style.setProperty('--sp', (max > 0 ? window.scrollY / max : 0).toFixed(4));
     });
   }
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -109,12 +114,12 @@
       if (!visible) return;
       var s = t / 1000;
       // slow drift on its own; the pointer takes over while it moves
-      var driftX = Math.sin(s * 0.23) * 0.5, driftY = Math.cos(s * 0.17) * 0.35;
+      var driftX = Math.sin(s * 0.31) * 0.8, driftY = Math.cos(s * 0.23) * 0.6;
       var usePtr = !coarse && (t - lastMove < 4000);
       var tx = usePtr ? ptr.x : driftX, ty = usePtr ? ptr.y : driftY;
       cur.x += (tx - cur.x) * 0.045; cur.y += (ty - cur.y) * 0.045;
-      gl.uniform2f(U.shift, -cur.x * 0.03, -cur.y * 0.022);
-      gl.uniform1f(U.zoom, 1.045 + Math.sin(s * 0.19) * 0.02);
+      gl.uniform2f(U.shift, -cur.x * 0.06, -cur.y * 0.045);
+      gl.uniform1f(U.zoom, 1.09 + Math.sin(s * 0.27) * 0.05);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 
