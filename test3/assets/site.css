@@ -1,10 +1,10 @@
 :root {
   /* palette taken from the first album photo: teal-black night, one warm light */
   --night-0: #05080b;
-  --night-1: #070d12;
-  --night-2: #0a141b;
-  --night-3: #0d1c26;
-  --night-4: #112632;
+  --night-1: #08121a;
+  --night-2: #0c1e2a;
+  --night-3: #122c3b;
+  --night-4: #1a3b4d;
   --ink: #f1e9e0;
   --mute: #8d99a1;
   --faint: #5a6870;
@@ -117,6 +117,15 @@ p { margin: 0; }
   vertical-align: middle; white-space: nowrap;
 }
 .horizon { height: 1px; background: linear-gradient(90deg, transparent, rgba(46, 163, 190, .7) 50%, transparent); box-shadow: 0 0 70px 16px rgba(46, 163, 190, .13); }
+
+/* ---------- the night, in steps: each zone is a tone lighter than the one before ---------- */
+#music { --prev: var(--night-0); --bg: var(--night-1); }
+#album { --prev: var(--night-1); --bg: var(--night-2); }
+#tour  { --prev: var(--night-2); --bg: var(--night-3); }
+#merch { --prev: var(--night-3); --bg: var(--night-3); }
+#band  { --prev: var(--night-3); --bg: var(--night-4); --mute: #a7b4bb; --faint: #7d8d96; --line: rgba(241, 233, 224, .22); }
+#music, #album, #tour, #merch, #band { background: linear-gradient(180deg, var(--prev) 0, var(--bg) 240px); }
+#merch { padding-top: 0; }
 
 /* ---------- zone 1: opening ---------- */
 .hero { padding: 0; min-height: min(100vh, 980px); display: flex; align-items: flex-end; overflow: hidden; margin-top: -58px; }
