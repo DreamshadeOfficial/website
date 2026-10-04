@@ -183,6 +183,7 @@
       'varying vec2 v;',
       'uniform sampler2D A, B;',
       'uniform float mixAB, aspA, aspB, ca, t, sp, vel, flash, shardOn, liquidOn;',
+      'uniform float kRotT, kRotS, kZoomT, kZoomS, kZoom0, kSplit, kHold;',
       'uniform vec2 ptr;',
       'vec2 hash2(vec2 p){ p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))); return fract(sin(p) * 43758.5453); }',
       'mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }',
@@ -210,8 +211,8 @@
       '  float shard = (.45 + .35 * sin(t * .21) + vel * 1.4) * shardOn;',
       '  float edge = smoothstep(.07, .0, d2 - d1);',
       // whole picture: turns and breathes with time, turns and comes closer with scroll, follows the pointer
-      '  float ang = -.3 + sp * .9 + sin(t * .31) * .16 + r.x * shard * .5;',
-      '  float zoom = 1.3 + .3 * sin(t * .47) + sp * .35 + r.y * shard * .35;',
+      '  float ang = (sp - .33) * .9 * kRotS + sin(t * .31) * .16 * kRotT + r.x * shard * .5;',
+      '  float zoom = max(.35, 1.3 * kZoom0 + .3 * sin(t * .47) * kZoomT + sp * .35 * kZoomS + r.y * shard * .35);',
       '  vec2 q = rot(ang) * p / zoom;',
       '  q += ptr * .09 + r * shard * .13;',
       // liquid: the surface ripples, harder when scrolling fast
@@ -219,11 +220,11 @@
       '  q += amp * vec2(sin(q.y * 9. + t * 1.1) + sin(q.y * 23. - t * 1.7) * .4, cos(q.x * 8. - t * .9) + cos(q.x * 19. + t * 1.3) * .4);',
       '  q.y *= 1. - vel * .35;',
       // colour split along the scroll direction and on flashes
-      '  vec2 off = vec2(.004, .012) * (vel * 2.2 + flash * 1.5 + .12);',
+      '  vec2 off = vec2(.004, .012) * (vel * 2.2 + flash * 1.5 + .12 * kSplit);',
       '  vec3 col = vec3(pic(q + off).r, pic(q).g, pic(q - off).b);',
       '  col += edge * shard * vec3(.25, .5, .58) * .55;',
       '  float lum = dot(col, vec3(.3, .59, .11));',
-      '  col *= mix(1., .5, smoothstep(.25, .9, lum));',   // bright photos are held back so the text stays readable
+      '  col *= mix(1., 1. - .5 * kHold, smoothstep(.25, .9, lum));',   // bright photos are held back so the text stays readable
       '  col = col * (1. + flash * 2.2) + flash * vec3(.30, .44, .48);',   // added light, so the flash shows on dark photos too
       '  float vig = smoothstep(1.25, .25, length(p));',
       '  gl_FragColor = vec4(col * mix(.55, 1., vig), 1.);',
@@ -242,7 +243,7 @@
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     var U = {};
-    ['A', 'B', 'mixAB', 'aspA', 'aspB', 'ca', 't', 'sp', 'vel', 'flash', 'ptr', 'shardOn', 'liquidOn'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+    ['A', 'B', 'mixAB', 'aspA', 'aspB', 'ca', 't', 'sp', 'vel', 'flash', 'ptr', 'shardOn', 'liquidOn', 'kRotT', 'kRotS', 'kZoomT', 'kZoomS', 'kZoom0', 'kSplit', 'kHold'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
     gl.uniform1i(U.A, 0); gl.uniform1i(U.B, 1);
 
     function makeTexture(image) {
@@ -260,10 +261,14 @@
     var cur = { x: 0, y: 0 }, ptr = { x: 0, y: 0 };
     var lastY = window.scrollY, vel = 0, flash = 0, nextFlash = 4000;
     var opts = { shards: true, liquid: true };
+    // every value is a multiplier of the built-in amount: 1 = as designed, 0 = off
+    var P = { intensity: 1, speed: 1, rotT: 1, rotS: 1, zoom0: 1, zoomT: 1, zoomS: 1, vel: 1, ptr: 1, flash: 1, flashEvery: 1, split: 1, fade: 1, hold: 1, shard: 1, liquid: 1, sharp: 1, lights: 1 };
+    var clock = 0, lastNow = 0, sharpNow = 1;
 
     function resize() {
       // rendered small on purpose: it is a soft background, and it keeps phones cool
-      var k = Math.min(window.devicePixelRatio || 1, 1.5) * 0.6;
+      var k = Math.min(window.devicePixelRatio || 1, 1.5) * 0.6 * Math.max(0.15, P.sharp);
+      sharpNow = P.sharp;
       canvas.width = Math.max(2, Math.round(window.innerWidth * k));
       canvas.height = Math.max(2, Math.round(window.innerHeight * k));
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -277,33 +282,40 @@
     function frame(now) {
       if (!running) return;
       requestAnimationFrame(frame);
+      if (P.sharp !== sharpNow) resize();
+      clock += Math.min(100, now - (lastNow || now)) * P.speed; lastNow = now;
       var y = window.scrollY, vh = window.innerHeight;
       // how fast the page is moving, smoothed; 1 = a hard flick
       var raw = Math.min(1, Math.abs(y - lastY) / 70);
       lastY = y;
       vel += (raw - vel) * (raw > vel ? 0.35 : 0.06);
       // flashes: every few seconds on their own, and when the scroll is violent
-      if (now > nextFlash || (raw > 0.92 && flash < 0.2)) { flash = 1; nextFlash = now + 5000 + Math.random() * 7000; }
+      if (now > nextFlash || (raw > 0.92 && flash < 0.2)) { flash = 1; nextFlash = now + (5000 + Math.random() * 7000) * Math.max(0.1, P.flashEvery); }
       flash *= 0.93;
       // which two photos, and how far between them
       var mid = y + vh * 0.5, i = 0;
       for (var k = 0; k < tops.length; k++) if (mid >= tops[k]) i = k;
       var j = Math.min(i + 1, zones.length - 1);
-      var fade = vh * 0.55, m = 0;
+      var fade = Math.max(1, vh * 0.55 * P.fade), m = 0;
       if (j !== i) m = Math.max(0, Math.min(1, (mid - (tops[j] - fade)) / fade));
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, zones[i].tex);
       gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, zones[j].tex);
       gl.uniform1f(U.aspA, zones[i].asp); gl.uniform1f(U.aspB, zones[j].asp);
       gl.uniform1f(U.mixAB, m * m * (3 - 2 * m));
       cur.x += (ptr.x - cur.x) * 0.06; cur.y += (ptr.y - cur.y) * 0.06;
-      gl.uniform2f(U.ptr, -cur.x, -cur.y);
+      gl.uniform2f(U.ptr, -cur.x * P.ptr, -cur.y * P.ptr);
       var max = document.documentElement.scrollHeight - vh;
       gl.uniform1f(U.sp, max > 0 ? y / max : 0);
-      gl.uniform1f(U.t, now / 1000);
-      gl.uniform1f(U.vel, vel);
-      gl.uniform1f(U.flash, flash);
-      gl.uniform1f(U.shardOn, opts.shards ? 1 : 0);
-      gl.uniform1f(U.liquidOn, opts.liquid ? 1 : 0);
+      gl.uniform1f(U.t, clock / 1000);
+      gl.uniform1f(U.vel, Math.min(1.5, vel * P.vel));
+      gl.uniform1f(U.flash, flash * P.flash);
+      gl.uniform1f(U.shardOn, opts.shards ? P.shard : 0);
+      gl.uniform1f(U.liquidOn, opts.liquid ? P.liquid : 0);
+      gl.uniform1f(U.kRotT, P.rotT); gl.uniform1f(U.kRotS, P.rotS);
+      gl.uniform1f(U.kZoomT, P.zoomT); gl.uniform1f(U.kZoomS, P.zoomS); gl.uniform1f(U.kZoom0, P.zoom0);
+      gl.uniform1f(U.kSplit, P.split); gl.uniform1f(U.kHold, Math.min(2, P.hold));
+      root.style.setProperty('--amb-k', P.intensity);
+      root.style.setProperty('--lights', P.lights);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 
@@ -336,7 +348,8 @@
         }).catch(function () {});
       },
       stop: function () { running = false; root.classList.remove('ambient-gl'); },
-      opts: opts
+      opts: opts,
+      params: P
     };
   })();
 
@@ -363,6 +376,60 @@
       apply();
     });
   });
+
+
+  /* ---------- tuning panel (demo only): one slider per adjustable amount ---------- */
+  if (ambient) (function () {
+    var P = ambient.params, defaults = JSON.parse(JSON.stringify(P));
+    var rows = [
+      ['intensity', 'Intensità sfondo'], ['speed', 'Velocità generale'],
+      ['rotT', 'Rotazione continua'], ['rotS', 'Rotazione con lo scroll'],
+      ['zoom0', 'Grandezza foto'], ['zoomT', 'Zoom continuo'], ['zoomS', 'Zoom con lo scroll'],
+      ['vel', 'Reazione alla velocità'], ['ptr', 'Reazione a mouse / inclinazione'],
+      ['flash', 'Lampi: forza'], ['flashEvery', 'Lampi: pausa fra uno e l’altro'],
+      ['split', 'Separazione colori a riposo'], ['fade', 'Dissolvenza fra le foto'],
+      ['hold', 'Freno sulle zone chiare'], ['shard', 'Specchio: forza'], ['liquid', 'Liquido: forza'],
+      ['sharp', 'Nitidezza'], ['lights', 'Luci vaganti']
+    ];
+    try { var saved = JSON.parse(localStorage.getItem('motion-params') || '{}'); rows.forEach(function (r) { if (typeof saved[r[0]] === 'number') P[r[0]] = saved[r[0]]; }); } catch (e) {}
+
+    var open = button(); open.textContent = 'Regola';
+    var box = document.createElement('div'); box.className = 'motion-panel'; box.hidden = true;
+    var inputs = {};
+    rows.forEach(function (r) {
+      var label = document.createElement('label');
+      var name = document.createElement('span'); name.textContent = r[1];
+      var val = document.createElement('output');
+      var input = document.createElement('input');
+      input.type = 'range'; input.min = 0; input.max = 2; input.step = 0.05; input.value = P[r[0]];
+      function show() { val.textContent = Math.round(P[r[0]] * 100) + '%'; }
+      input.addEventListener('input', function () { P[r[0]] = parseFloat(input.value); show(); save(); });
+      show();
+      label.appendChild(name); label.appendChild(val); label.appendChild(input);
+      box.appendChild(label);
+      inputs[r[0]] = { input: input, show: show };
+    });
+    function text() { return rows.map(function (r) { return r[0] + '=' + P[r[0]]; }).join(' '); }
+    function save() { try { localStorage.setItem('motion-params', JSON.stringify(P)); } catch (e) {} out.value = text(); }
+    var out = document.createElement('textarea'); out.readOnly = true; out.rows = 3; out.setAttribute('aria-label', 'Valori attuali');
+    var copy = document.createElement('button'); copy.type = 'button'; copy.textContent = 'Copia valori';
+    copy.addEventListener('click', function () {
+      out.select();
+      var done = function () { copy.textContent = 'Copiato'; setTimeout(function () { copy.textContent = 'Copia valori'; }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(out.value).then(done, function () { document.execCommand('copy'); done(); }); else { document.execCommand('copy'); done(); }
+    });
+    var reset = document.createElement('button'); reset.type = 'button'; reset.textContent = 'Azzera';
+    reset.addEventListener('click', function () {
+      rows.forEach(function (r) { P[r[0]] = defaults[r[0]]; inputs[r[0]].input.value = P[r[0]]; inputs[r[0]].show(); });
+      save();
+    });
+    var foot = document.createElement('div'); foot.className = 'motion-panel-foot';
+    foot.appendChild(copy); foot.appendChild(reset);
+    box.appendChild(out); box.appendChild(foot);
+    panel.insertBefore(box, panel.firstChild);
+    out.value = text();
+    open.addEventListener('click', function () { box.hidden = !box.hidden; open.textContent = box.hidden ? 'Regola' : 'Chiudi'; });
+  })();
 
   function apply() {
     root.classList.toggle('motion', mode !== 'off');
