@@ -1,14 +1,16 @@
 :root {
-  --night-0: #040507;
-  --night-1: #070a10;
-  --night-2: #0b101a;
-  --night-3: #101724;
-  --night-4: #161f2f;
-  --ink: #eceef3;
-  --mute: #8a92a3;
-  --faint: #5b6272;
-  --line: rgba(236, 238, 243, .16);
-  --ember: #ff6b3d;
+  /* palette taken from the first album photo: teal-black night, one warm light */
+  --night-0: #05080b;
+  --night-1: #070d12;
+  --night-2: #0a141b;
+  --night-3: #0d1c26;
+  --night-4: #112632;
+  --ink: #f1e9e0;
+  --mute: #8d99a1;
+  --faint: #5a6870;
+  --line: rgba(241, 233, 224, .16);
+  --ember: #d9482c;
+  --glow: #2ea3be;
   --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -26,6 +28,14 @@ body {
   background: linear-gradient(180deg, var(--night-0) 0%, var(--night-1) 22%, var(--night-2) 48%, var(--night-3) 74%, var(--night-4) 100%);
 }
 
+body::after {
+  content: "";
+  position: fixed; inset: 0; z-index: 40;
+  pointer-events: none;
+  opacity: .07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 a { color: inherit; }
 img { display: block; max-width: 100%; height: auto; }
 .wrap { width: min(100% - 48px, 1080px); margin: 0 auto; }
@@ -34,9 +44,9 @@ img { display: block; max-width: 100%; height: auto; }
 /* ---------- header ---------- */
 .top {
   position: sticky; top: 0; z-index: 10;
-  background: rgba(4, 5, 7, .82);
+  background: rgba(5, 8, 11, .72);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(236, 238, 243, .06);
+  border-bottom: 1px solid rgba(241, 233, 224, .06);
 }
 .top-inner { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 18px 0; }
 .logo {
@@ -89,29 +99,40 @@ p { margin: 0; }
 }
 .btn:hover, .btn:focus-visible { border-color: var(--ink); }
 .btn.solid { background: var(--ink); color: var(--night-0); border-color: var(--ink); }
+.btn.solid:hover, .btn.solid:focus-visible { background: var(--ember); border-color: var(--ember); color: var(--ink); }
 
 /* placeholders: everything dashed is not final */
 .ph {
   display: flex; align-items: center; justify-content: center;
-  border: 1px dashed rgba(236, 238, 243, .28);
-  background: rgba(236, 238, 243, .025);
+  border: 1px dashed rgba(241, 233, 224, .26);
+  background: rgba(241, 233, 224, .02);
   color: var(--faint);
   font-size: 11px; letter-spacing: .2em; text-transform: uppercase; text-align: center;
   padding: 20px;
 }
 .ph-tag {
   display: inline-block; margin-left: 10px; padding: 2px 8px;
-  border: 1px dashed rgba(236, 238, 243, .28);
+  border: 1px dashed rgba(241, 233, 224, .26);
   font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint);
   vertical-align: middle; white-space: nowrap;
 }
-.horizon { height: 1px; background: linear-gradient(90deg, transparent, rgba(160, 185, 255, .5) 50%, transparent); box-shadow: 0 0 60px 14px rgba(70, 105, 210, .14); }
+.horizon { height: 1px; background: linear-gradient(90deg, transparent, rgba(46, 163, 190, .7) 50%, transparent); box-shadow: 0 0 70px 16px rgba(46, 163, 190, .13); }
 
 /* ---------- zone 1: opening ---------- */
-.hero { padding: 0; }
-.hero-photo { min-height: min(86vh, 820px); align-items: flex-start; border-width: 0 0 1px; }
-.hero-photo span { margin-top: 28px; }
-.hero-copy { position: absolute; left: 0; right: 0; bottom: clamp(40px, 9vh, 96px); }
+.hero { padding: 0; min-height: min(100vh, 980px); display: flex; align-items: flex-end; overflow: hidden; margin-top: -58px; }
+.hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 60%; }
+/* the photo sinks into the page: dark at the top for the menu, night-0 at the bottom */
+.hero::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 8, 11, .55) 0%, rgba(5, 8, 11, 0) 22%, rgba(5, 8, 11, 0) 55%, var(--night-0) 100%),
+    linear-gradient(270deg, rgba(5, 8, 11, .55) 0%, rgba(5, 8, 11, 0) 55%);
+}
+.hero-copy { position: relative; z-index: 1; width: 100%; padding-bottom: clamp(48px, 10vh, 110px); }
+.hero-copy .wrap { display: flex; justify-content: flex-end; }
+.hero-text { width: min(100%, 460px); }
+.hero .eyebrow { color: var(--ink); opacity: .75; }
+.hero .eyebrow::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 12px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 12px 2px rgba(217, 72, 44, .6); vertical-align: 1px; }
 
 /* ---------- zone 2: music ---------- */
 .single { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; align-items: center; margin-top: 40px; }
@@ -127,7 +148,7 @@ p { margin: 0; }
 .album { display: grid; grid-template-columns: minmax(240px, 420px) 1fr; gap: 56px; align-items: center; }
 .album .ph { aspect-ratio: 1; }
 .nights { margin: 30px 0 0; display: flex; align-items: baseline; gap: 14px; }
-.nights b { font-size: clamp(56px, 9vw, 104px); line-height: .9; font-weight: 500; letter-spacing: -.04em; }
+.nights b { color: var(--ink); font-size: clamp(56px, 9vw, 104px); line-height: .9; font-weight: 500; letter-spacing: -.04em; }
 .nights span { font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
 
 .signup { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: end; }
@@ -245,6 +266,10 @@ p { margin: 0; }
   .single, .album, .band, .contact, .signup { grid-template-columns: 1fr; gap: 32px; }
   .singles { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   .logo { width: 132px; }
+  .hero { margin-top: -81px; min-height: 100svh; }
+  .hero-img { object-position: 36% 50%; }
+  .hero-copy .wrap { justify-content: flex-start; }
+  .hero::after { background: linear-gradient(180deg, rgba(5, 8, 11, .6) 0%, rgba(5, 8, 11, 0) 20%, rgba(5, 8, 11, 0) 58%, var(--night-0) 100%); }
   .burger { display: block; }
   .nav {
     position: fixed; inset: 0; z-index: -1;
@@ -258,7 +283,7 @@ p { margin: 0; }
   .menu-open .nav { opacity: 1; visibility: visible; }
   .menu-open { overflow: hidden; }
   /* blur on the bar would trap the fixed menu inside it */
-  .top { backdrop-filter: none; background: rgba(4, 5, 7, .94); }
+  .top { backdrop-filter: none; background: rgba(5, 8, 11, .94); }
   .downloads li { grid-template-columns: 1fr; }
   .dl { justify-content: flex-start; }
   .legal { flex-direction: column; }
