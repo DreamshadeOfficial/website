@@ -260,7 +260,6 @@
     var ready = false, running = false, tops = [];
     var cur = { x: 0, y: 0 }, ptr = { x: 0, y: 0 };
     var lastY = window.scrollY, vel = 0, flash = 0, nextFlash = 4000;
-    var opts = { shards: true, liquid: true };
     // every value is a multiplier of the built-in amount: 1 = as designed, 0 = off
     var P = { intensity: 1, speed: 1, rotT: 1, rotS: 1, zoom0: 1, zoomT: 1, zoomS: 1, vel: 1, ptr: 1, flash: 1, flashEvery: 1, split: 1, fade: 1, hold: 1, shard: 1, liquid: 1, sharp: 1, lights: 1 };
     var clock = 0, lastNow = 0, sharpNow = 1;
@@ -309,8 +308,8 @@
       gl.uniform1f(U.t, clock / 1000);
       gl.uniform1f(U.vel, Math.min(1.5, vel * P.vel));
       gl.uniform1f(U.flash, flash * P.flash);
-      gl.uniform1f(U.shardOn, opts.shards ? P.shard : 0);
-      gl.uniform1f(U.liquidOn, opts.liquid ? P.liquid : 0);
+      gl.uniform1f(U.shardOn, P.shard);
+      gl.uniform1f(U.liquidOn, P.liquid);
       gl.uniform1f(U.kRotT, P.rotT); gl.uniform1f(U.kRotS, P.rotS);
       gl.uniform1f(U.kZoomT, P.zoomT); gl.uniform1f(U.kZoomS, P.zoomS); gl.uniform1f(U.kZoom0, P.zoom0);
       gl.uniform1f(U.kSplit, P.split); gl.uniform1f(U.kHold, Math.min(2, P.hold));
@@ -348,7 +347,6 @@
         }).catch(function () {});
       },
       stop: function () { running = false; root.classList.remove('ambient-gl'); },
-      opts: opts,
       params: P
     };
   })();
@@ -362,21 +360,7 @@
   document.body.appendChild(panel);
   function button() { var b = document.createElement('button'); b.type = 'button'; panel.appendChild(b); return b; }
   var btn = button();
-  // the two effects of the WebGL background that can be judged on their own
-  var toggles = [
-    { key: 'shards', label: 'Specchio', el: button() },
-    { key: 'liquid', label: 'Liquido', el: button() }
-  ];
-  toggles.forEach(function (tg) {
-    try { var saved = sessionStorage.getItem('motion-' + tg.key); if (saved && ambient) ambient.opts[tg.key] = saved === '1'; } catch (e) {}
-    tg.el.addEventListener('click', function () {
-      if (!ambient) return;
-      ambient.opts[tg.key] = !ambient.opts[tg.key];
-      try { sessionStorage.setItem('motion-' + tg.key, ambient.opts[tg.key] ? '1' : '0'); } catch (e) {}
-      apply();
-    });
-  });
-
+  var tune = null, tuneBox = null;
 
   /* ---------- tuning panel (demo only): one slider per adjustable amount ---------- */
   if (ambient) (function () {
@@ -388,13 +372,13 @@
       ['vel', 'Reazione alla velocità'], ['ptr', 'Reazione a mouse / inclinazione'],
       ['flash', 'Lampi: forza'], ['flashEvery', 'Lampi: pausa fra uno e l’altro'],
       ['split', 'Separazione colori a riposo'], ['fade', 'Dissolvenza fra le foto'],
-      ['hold', 'Freno sulle zone chiare'], ['shard', 'Specchio: forza'], ['liquid', 'Liquido: forza'],
+      ['hold', 'Freno sulle zone chiare'], ['shard', 'Specchio (0 = spento)'], ['liquid', 'Liquido (0 = spento)'],
       ['sharp', 'Nitidezza'], ['lights', 'Luci vaganti']
     ];
     try { var saved = JSON.parse(localStorage.getItem('motion-params') || '{}'); rows.forEach(function (r) { if (typeof saved[r[0]] === 'number') P[r[0]] = saved[r[0]]; }); } catch (e) {}
 
-    var open = button(); open.textContent = 'Regola';
-    var box = document.createElement('div'); box.className = 'motion-panel'; box.hidden = true;
+    var open = button(); open.textContent = 'Regola'; tune = open;
+    var box = document.createElement('div'); box.className = 'motion-panel'; box.hidden = true; tuneBox = box;
     var inputs = {};
     rows.forEach(function (r) {
       var label = document.createElement('label');
@@ -436,14 +420,8 @@
     if (mode === 'two' && depth) depth.start(); else if (depth) depth.stop();
     if (mode === 'two' && ambient) ambient.start(); else if (ambient) ambient.stop();
     btn.textContent = labels[mode];
-    toggles.forEach(function (tg) {
-      var usable = ambient && mode === 'two';
-      tg.el.hidden = !usable;
-      if (usable) {
-        tg.el.textContent = tg.label + ': ' + (ambient.opts[tg.key] ? 'on' : 'off');
-        tg.el.setAttribute('aria-pressed', ambient.opts[tg.key]);
-      }
-    });
+    if (tune) tune.hidden = !(ambient && mode === 'two');
+    if (tuneBox && tune && tune.hidden) { tuneBox.hidden = true; tune.textContent = 'Regola'; }
     onScroll();
     try { sessionStorage.setItem('motion', mode); } catch (e) {}
   }
