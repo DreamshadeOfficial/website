@@ -160,8 +160,17 @@ p { margin: 0; }
 .nights b { color: var(--ink); font-size: clamp(56px, 9vw, 104px); line-height: .9; font-weight: 500; letter-spacing: -.04em; }
 .nights span { font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
 
-.signup { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: end; }
-.signup h2 { margin-bottom: 14px; }
+/* newsletter: one compact strip, not a section */
+.signup {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px 56px; align-items: center;
+  padding: 30px 0 26px;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.signup-text p { margin-top: 4px; color: var(--mute); font-size: 14px; }
+.signup .formkit-input { font-size: 16px; padding: 12px 0; }
+.signup .note { margin-top: 10px; font-size: 11px; }
+.signup .formkit-powered-by-convertkit-container { display: inline; margin: 0; }
+.signup .note + .formkit-powered-by-convertkit-container { margin-left: 0; }
 
 /* Kit form, restyled */
 .formkit-form { margin: 0; }
@@ -192,7 +201,7 @@ p { margin: 0; }
 .formkit-alert-error { color: var(--ember); }
 .formkit-alert-success { margin: 0; padding: 16px 0; border-bottom: 1px solid var(--ink); font-size: 18px; color: var(--ink); }
 .note { margin: 16px 0 0; font-size: 12px; color: var(--faint); }
-.formkit-powered-by-convertkit-container { margin-top: 22px; }
+.formkit-powered-by-convertkit-container { margin-top: 10px; }
 .formkit-powered-by-convertkit { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); text-decoration: none; opacity: .7; }
 .formkit-powered-by-convertkit:hover { opacity: 1; color: var(--mute); }
 
