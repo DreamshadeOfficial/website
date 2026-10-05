@@ -261,8 +261,8 @@
     var cur = { x: 0, y: 0 }, ptr = { x: 0, y: 0 };
     var lastY = window.scrollY, vel = 0, flash = 0, nextFlash = 4000;
     // every value is a multiplier of the built-in amount: 1 = as first designed, 0 = off.
-    // These defaults are the ones chosen by the band with the tuning panel (04.10.2026).
-    var P = { intensity: 0.35, speed: 1, rotT: 0.5, rotS: 0.1, zoom0: 1, zoomT: 0.2, zoomS: 0.15, vel: 0.1, ptr: 0.1, flash: 0, flashEvery: 0.05, split: 0, fade: 1, hold: 0.8, shard: 0, liquid: 0, sharp: 1, lights: 2 };
+    // These defaults are the ones chosen by the band with the tuning panel (last set 05.10.2026).
+    var P = { intensity: 0.35, speed: 1, rotT: 0.5, rotS: 0.1, zoom0: 1, zoomT: 0.2, zoomS: 0.15, vel: 0.25, ptr: 0.25, flash: 0.05, flashEvery: 1, split: 0, fade: 1.65, hold: 0.8, shard: 0, liquid: 0, sharp: 1, lights: 2 };
     var clock = 0, lastNow = 0, sharpNow = 1;
 
     function resize() {
@@ -376,7 +376,7 @@
       ['hold', 'Freno sulle zone chiare'], ['shard', 'Specchio (0 = spento)'], ['liquid', 'Liquido (0 = spento)'],
       ['sharp', 'Nitidezza'], ['lights', 'Luci vaganti']
     ];
-    try { var saved = JSON.parse(localStorage.getItem('motion-params-4') || '{}'); rows.forEach(function (r) { if (typeof saved[r[0]] === 'number') P[r[0]] = saved[r[0]]; }); } catch (e) {}
+    try { var saved = JSON.parse(localStorage.getItem('motion-params-5') || '{}'); rows.forEach(function (r) { if (typeof saved[r[0]] === 'number') P[r[0]] = saved[r[0]]; }); } catch (e) {}
 
     var open = button(); open.textContent = 'Regola'; tune = open;
     var box = document.createElement('div'); box.className = 'motion-panel'; box.hidden = true; tuneBox = box;
@@ -395,7 +395,7 @@
       inputs[r[0]] = { input: input, show: show };
     });
     function text() { return rows.map(function (r) { return r[0] + '=' + P[r[0]]; }).join(' '); }
-    function save() { try { localStorage.setItem('motion-params-4', JSON.stringify(P)); } catch (e) {} out.value = text(); }
+    function save() { try { localStorage.setItem('motion-params-5', JSON.stringify(P)); } catch (e) {} out.value = text(); }
     var out = document.createElement('textarea'); out.readOnly = true; out.rows = 3; out.setAttribute('aria-label', 'Valori attuali');
     var copy = document.createElement('button'); copy.type = 'button'; copy.textContent = 'Copia valori';
     copy.addEventListener('click', function () {
