@@ -9,7 +9,7 @@
   --mute: #8d99a1;
   --faint: #5a6870;
   --line: rgba(241, 233, 224, .16);
-  --ember: #d9482c;
+  --ember: #e0863f;   /* the warm light on the faces in the moodboard */
   --glow: #2ea3be;
   --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -116,6 +116,24 @@ p { margin: 0; }
   font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint);
   vertical-align: middle; white-space: nowrap;
 }
+.ph.media { position: relative; padding: 0; overflow: hidden; border-style: solid; border-color: rgba(241, 233, 224, .12); }
+.ph.media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .9; }
+.ph.media span { position: absolute; left: 12px; bottom: 10px; padding: 4px 8px; background: rgba(5, 8, 11, .7); font-size: 10px; letter-spacing: .18em; }
+
+/* the cover behind frosted glass: the closer the release, the clearer it gets (see motion.js) */
+.glass { position: relative; aspect-ratio: 1; overflow: hidden; background: #000; }
+.glass img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.glass .frost {
+  position: absolute; inset: -40px;
+  backdrop-filter: blur(var(--frost, 22px)) saturate(.8);
+  -webkit-backdrop-filter: blur(var(--frost, 22px)) saturate(.8);
+  background: radial-gradient(ellipse at 50% 40%, rgba(241, 233, 224, .06), rgba(5, 8, 11, .22) 70%);
+  transition: backdrop-filter .9s ease, -webkit-backdrop-filter .9s ease;
+}
+/* a hand on the glass: hovering or touching clears it a little */
+.glass.touched .frost { --frost: var(--frost-touch, 9px); }
+.glass .ph-tag { position: absolute; left: 12px; bottom: 12px; background: rgba(5, 8, 11, .7); }
+
 .horizon { height: 1px; background: linear-gradient(90deg, transparent, rgba(46, 163, 190, .7) 50%, transparent); box-shadow: 0 0 70px 16px rgba(46, 163, 190, .13); }
 
 /* ---------- the night, in steps: each zone is a tone lighter than the one before ---------- */
@@ -131,7 +149,7 @@ p { margin: 0; }
 .hero { padding: 0; min-height: min(100vh, 980px); display: flex; align-items: flex-end; overflow: hidden; margin-top: -58px; }
 .hero-media { position: absolute; inset: 0; will-change: transform; }
 .hero-img, .hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.hero-img { object-fit: cover; object-position: 30% 60%; }
+.hero-img { object-fit: cover; object-position: 50% 22%; }
 .hero-canvas { opacity: 0; transition: opacity .8s ease; }
 .depth-on .hero-canvas { opacity: 1; }
 /* the photo sinks into the page: dark at the top for the menu, night-0 at the bottom */
@@ -145,7 +163,7 @@ p { margin: 0; }
 .hero-copy .wrap { display: flex; justify-content: flex-end; }
 .hero-text { width: min(100%, 460px); }
 .hero .eyebrow { color: var(--ink); opacity: .75; }
-.hero .eyebrow::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 12px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 12px 2px rgba(217, 72, 44, .6); vertical-align: 1px; }
+.hero .eyebrow::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 12px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 12px 2px rgba(224, 134, 63, .6); vertical-align: 1px; }
 
 /* ---------- zone 2: music ---------- */
 .single { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; align-items: center; margin-top: 40px; }
@@ -289,7 +307,7 @@ p { margin: 0; }
   .singles { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   .logo { width: 132px; }
   .hero { margin-top: -81px; min-height: 100svh; }
-  .hero-img { object-position: 36% 50%; }
+  .hero-img { object-position: 50% 30%; }
   .hero-copy .wrap { justify-content: flex-start; }
   .hero::after { background: linear-gradient(180deg, rgba(5, 8, 11, .6) 0%, rgba(5, 8, 11, 0) 20%, rgba(5, 8, 11, 0) 58%, var(--night-0) 100%); }
   .burger { display: block; }
@@ -358,13 +376,14 @@ body::after { inset: -120px; }
 .amb-light { position: absolute; border-radius: 50%; filter: blur(70px); mix-blend-mode: screen; opacity: calc((.35 + var(--amb, 0) * .65) * var(--lights, 1)); }
 .amb-a { width: 46vw; height: 46vw; left: -12vw; top: 8vh; background: radial-gradient(circle, rgba(46, 163, 190, .26), rgba(46, 163, 190, 0) 68%); }
 .amb-b { width: 38vw; height: 38vw; right: -8vw; bottom: -6vh; background: radial-gradient(circle, rgba(34, 96, 150, .34), rgba(34, 96, 150, 0) 68%); }
-.amb-c { width: 16vw; height: 16vw; left: 58vw; top: 22vh; background: radial-gradient(circle, rgba(217, 72, 44, .22), rgba(217, 72, 44, 0) 70%); }
+.amb-c { width: 16vw; height: 16vw; left: 58vw; top: 22vh; background: radial-gradient(circle, rgba(224, 134, 63, .24), rgba(224, 134, 63, 0) 70%); }
 
 /* on its own it keeps breathing in and out and rocking, on two different clocks so it never repeats exactly */
 .motion .amb-photo div { animation: zoom 13s ease-in-out infinite alternate, rock 19s ease-in-out infinite alternate; animation-composition: add; }
 @keyframes zoom { from { scale: 1; } to { scale: 1.34; } }
 @keyframes rock { from { rotate: -7deg; translate: -4% -3%; } to { rotate: 8deg; translate: 4% 4%; } }
 .motion .amb-a { animation: drift-a 34s ease-in-out infinite alternate; }
+.stasis .amb-light, .stasis body::after, .stasis .horizon { animation-play-state: paused; }
 .motion .amb-b { animation: drift-b 41s ease-in-out infinite alternate; }
 .motion .amb-c { animation: drift-c 27s ease-in-out infinite alternate; }
 @keyframes drift-a { from { transform: translate(0, 0) scale(1); } to { transform: translate(42vw, 46vh) scale(1.35); } }
@@ -395,7 +414,7 @@ body::after { inset: -120px; }
 }
 .motion-panel label { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; margin-bottom: 9px; }
 .motion-panel output { color: var(--mute); font-variant-numeric: tabular-nums; }
-.motion-panel input[type=range] { grid-column: 1 / -1; width: 100%; margin: 0; accent-color: #d9482c; }
+.motion-panel input[type=range] { grid-column: 1 / -1; width: 100%; margin: 0; accent-color: #e0863f; }
 .motion-panel textarea { width: 100%; margin-top: 4px; padding: 6px; border: 1px solid var(--line); background: transparent; color: var(--mute); font: 11px/1.4 monospace; resize: none; }
 .motion-panel-foot { display: flex; gap: 6px; margin-top: 8px; }
 .motion-panel-foot button { flex: 1; }

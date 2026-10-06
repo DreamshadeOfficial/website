@@ -24,6 +24,22 @@
   }, { rootMargin: '0px 0px -12% 0px' }) : null;
   targets.forEach(function (t) { t.classList.add('reveal'); if (io) io.observe(t); else t.classList.add('in'); });
 
+  /* ---------- the cover behind frosted glass: blur follows the nights left ---------- */
+  (function () {
+    var glass = document.getElementById('glass'), el = document.querySelector('[data-release]');
+    if (!glass) return;
+    var nights = null;
+    if (el && el.dataset.release) nights = Math.ceil((new Date(el.dataset.release + 'T00:00:00') - new Date()) / 86400000);
+    // no date yet: fully frosted; from 60 nights out it starts to clear; release day: clean glass
+    var k = nights === null ? 1 : Math.max(0, Math.min(1, nights / 60));
+    glass.style.setProperty('--frost', (k * 22).toFixed(1) + 'px');
+    glass.style.setProperty('--frost-touch', (k * 9).toFixed(1) + 'px');
+    // a hand on the glass: while the pointer rests on it (or a finger touches it) it clears a little
+    glass.addEventListener('pointerenter', function () { glass.classList.add('touched'); });
+    glass.addEventListener('pointerleave', function () { glass.classList.remove('touched'); });
+    glass.addEventListener('touchstart', function () { glass.classList.add('touched'); setTimeout(function () { glass.classList.remove('touched'); }, 2500); }, { passive: true });
+  })();
+
   /* ---------- level 1: parallax on the opening photo ---------- */
   var ticking = false;
   function onScroll() {
@@ -220,8 +236,8 @@
       '  q += amp * vec2(sin(q.y * 9. + t * 1.1) + sin(q.y * 23. - t * 1.7) * .4, cos(q.x * 8. - t * .9) + cos(q.x * 19. + t * 1.3) * .4);',
       '  q.y *= 1. - vel * .35;',
       // colour split along the scroll direction and on flashes
-      '  vec2 off = vec2(.004, .012) * (vel * 2.2 + flash * 1.5 + .12 * kSplit);',
-      '  vec3 col = vec3(pic(q + off).r, pic(q).g, pic(q - off).b);',
+      '  vec2 off = vec2(.0, .045) * (vel * 1.6 + flash * .6) + vec2(.003, .012) * kSplit;',   // multiple exposure along the scroll
+      '  vec3 col = (pic(q) * 2. + pic(q + off) + pic(q - off) + (pic(q + 2. * off) + pic(q - 2. * off)) * .5) / 5.;',
       '  col += edge * shard * vec3(.25, .5, .58) * .55;',
       '  float lum = dot(col, vec3(.3, .59, .11));',
       '  col *= mix(1., 1. - .5 * kHold, smoothstep(.25, .9, lum));',   // bright photos are held back so the text stays readable
@@ -263,7 +279,7 @@
     // every value is a multiplier of the built-in amount: 1 = as first designed, 0 = off.
     // These defaults are the ones chosen by the band with the tuning panel (last set 05.10.2026).
     var P = { intensity: 0.35, speed: 1, rotT: 0.5, rotS: 0.1, zoom0: 1, zoomT: 0.2, zoomS: 0.15, vel: 0.25, ptr: 0.25, flash: 0.05, flashEvery: 1, split: 0, fade: 1.65, hold: 0.8, shard: 0, liquid: 0, sharp: 1, lights: 2 };
-    var clock = 0, lastNow = 0, sharpNow = 1;
+    var clock = 0, lastNow = 0, sharpNow = 1, still = 0;   // still: 1 while the stasis zone holds the screen
 
     function resize() {
       // rendered small on purpose: it is a soft background, and it keeps phones cool
@@ -283,8 +299,12 @@
       if (!running) return;
       requestAnimationFrame(frame);
       if (P.sharp !== sharpNow) resize();
-      clock += Math.min(100, now - (lastNow || now)) * P.speed; lastNow = now;
       var y = window.scrollY, vh = window.innerHeight;
+      // stasis: between the start of the Music zone and the Album zone, the clock slows to a halt
+      var inStasis = tops.length > 1 && (y + vh * 0.5) >= tops[0] && (y + vh * 0.5) < tops[1];
+      still += ((inStasis ? 1 : 0) - still) * 0.04;
+      root.classList.toggle('stasis', still > 0.85);
+      clock += Math.min(100, now - (lastNow || now)) * P.speed * (1 - still); lastNow = now;
       // how fast the page is moving, smoothed; 1 = a hard flick
       var raw = Math.min(1, Math.abs(y - lastY) / 70);
       lastY = y;
@@ -372,7 +392,7 @@
       ['zoom0', 'Grandezza foto'], ['zoomT', 'Zoom continuo'], ['zoomS', 'Zoom con lo scroll'],
       ['vel', 'Reazione alla velocità'], ['ptr', 'Reazione a mouse / inclinazione'],
       ['flash', 'Lampi: forza'], ['flashEvery', 'Lampi: pausa fra uno e l’altro'],
-      ['split', 'Separazione colori a riposo'], ['fade', 'Dissolvenza fra le foto'],
+      ['split', 'Sdoppiamento a riposo'], ['fade', 'Dissolvenza fra le foto'],
       ['hold', 'Freno sulle zone chiare'], ['shard', 'Specchio (0 = spento)'], ['liquid', 'Liquido (0 = spento)'],
       ['sharp', 'Nitidezza'], ['lights', 'Luci vaganti']
     ];
