@@ -191,6 +191,19 @@ p { margin: 0; }
 .nights span { font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
 
 /* newsletter: one compact strip, not a section */
+/* the email field reads as a box you can type in: filled, framed, a caret-like hint */
+.signup .formkit-fields {
+  border: 1px solid rgba(241, 233, 224, .32); border-bottom-width: 1px;
+  background: rgba(5, 8, 11, .55);
+  padding: 0 0 0 16px;
+  transition: border-color .3s ease, background-color .3s ease, box-shadow .3s ease;
+}
+.signup .formkit-fields:hover { border-color: rgba(241, 233, 224, .55); }
+.signup .formkit-fields:focus-within { border-color: var(--ember); background: rgba(5, 8, 11, .8); box-shadow: 0 0 0 3px rgba(224, 134, 63, .18); }
+.signup .formkit-input::placeholder { color: var(--mute); }
+.signup .formkit-submit { padding: 0 18px; background: var(--ink) !important; color: var(--night-0) !important; }
+.signup .formkit-submit > span::after { display: none; }
+.signup .formkit-submit:hover, .signup .formkit-submit:focus-visible { background: var(--ember) !important; color: var(--ink) !important; }
 .signup {
   display: grid; grid-template-columns: 1fr 1fr; gap: 20px 56px; align-items: center;
   padding: 30px 0 26px;
