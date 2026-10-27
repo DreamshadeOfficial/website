@@ -370,6 +370,13 @@ p { margin: 0; }
   .dl { justify-content: flex-start; }
   .legal { flex-direction: column; }
 }
+/* narrow phones: the button goes under the field, so the field keeps its full width and the hint stays readable */
+@media (max-width: 520px) {
+  .signup .formkit-fields { flex-direction: column; padding: 0; }
+  .signup .formkit-input { padding: 14px 16px; }
+  .signup .formkit-submit { padding: 14px 18px; }
+}
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
 
 /* ---------- press page ---------- */
