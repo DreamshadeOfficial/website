@@ -188,7 +188,7 @@
       { id: 'music', src: 'assets/photos/bg-1.jpg' },
       { id: 'album', src: 'assets/photos/bg-2.jpg' },
       { id: 'tour', src: 'assets/photos/bg-3.jpg' },
-      { id: 'band', src: 'assets/photos/bg-4.jpg' },
+      { id: 'band', src: 'assets/photos/bg-4.jpg?v=202611242151' },
       { id: 'videos', src: 'assets/photos/bg-5.jpg' },
       { id: 'newsletter', src: 'assets/photos/bg-6.jpg' }
     ];
