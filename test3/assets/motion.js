@@ -160,7 +160,7 @@
         var go = function () { running = true; root.classList.add('depth-on'); requestAnimationFrame(frame); };
         if (ready) return go();
         var photo = img.currentSrc || img.src;
-        Promise.all([load(photo), load('assets/photos/hero-depth.jpg')]).then(function (r) {
+        Promise.all([load(photo), load('assets/photos/hero-depth.jpg?v=e4ee8d3708')]).then(function (r) {
           aspect = r[0].naturalWidth / r[0].naturalHeight;
           texture(0, r[0]); texture(1, r[1]);
           gl.uniform1i(U.img, 0); gl.uniform1i(U.dep, 1);
@@ -184,14 +184,10 @@
     holder.insertBefore(canvas, holder.firstChild);
 
     // which photo sits behind which part of the page (id of the block where it takes over)
+    // the photos are the singles' covers: each one appears only once its single is announced
     var zones = [
-      { id: 'music', src: 'assets/photos/bg-1.jpg' },
-      { id: 'album', src: 'assets/photos/bg-2.jpg' },
-      { id: 'tour', src: 'assets/photos/bg-3.jpg' },
-      { id: 'band', src: 'assets/photos/bg-4.jpg?v=202611242151' },
-      { id: 'videos', src: 'assets/photos/bg-5.jpg' },
-      { id: 'newsletter', src: 'assets/photos/bg-6.jpg' }
-    ];
+      { id: 'music', src: 'assets/photos/bg-shl.jpg?v=1b8181d537' }
+    ].filter(function (z) { return document.getElementById(z.id); });
 
     var vs = 'attribute vec2 p; varying vec2 v; void main(){ v = p * .5 + .5; v.y = 1. - v.y; gl_Position = vec4(p, 0., 1.); }';
     var fs = [
@@ -372,16 +368,17 @@
     };
   })();
 
-  /* ---------- switch between levels (demo only) ---------- */
-  var labels = { off: 'Movimento: spento', one: 'Movimento: 1', two: 'Movimento: 1 + 2' };
-  var order = (depth || ambient) ? ['two', 'one', 'off'] : ['one', 'off'];
   if (!depth && !ambient && mode === 'two') mode = 'one';
+  var btn = null, tune = null, tuneBox = null, labels = null;
+
+  /* ---------- switch between levels (demo only) ---------- */
+  labels = { off: 'Movimento: spento', one: 'Movimento: 1', two: 'Movimento: 1 + 2' };
+  var order = (depth || ambient) ? ['two', 'one', 'off'] : ['one', 'off'];
   var panel = document.createElement('div');
   panel.className = 'motion-switch';
   document.body.appendChild(panel);
   function button() { var b = document.createElement('button'); b.type = 'button'; panel.appendChild(b); return b; }
-  var btn = button();
-  var tune = null, tuneBox = null;
+  btn = button();
 
   /* ---------- tuning panel (demo only): one slider per adjustable amount ---------- */
   if (ambient) (function () {
@@ -436,19 +433,20 @@
     open.addEventListener('click', function () { box.hidden = !box.hidden; open.textContent = box.hidden ? 'Regola' : 'Chiudi'; });
   })();
 
+  btn.addEventListener('click', function () {
+    mode = order[(order.indexOf(mode) + 1) % order.length];
+    apply();
+    try { sessionStorage.setItem('motion', mode); } catch (e) {}
+  });
+
   function apply() {
     root.classList.toggle('motion', mode !== 'off');
     if (mode === 'two' && depth) depth.start(); else if (depth) depth.stop();
     if (mode === 'two' && ambient) ambient.start(); else if (ambient) ambient.stop();
-    btn.textContent = labels[mode];
+    if (btn) btn.textContent = labels[mode];
     if (tune) tune.hidden = !(ambient && mode === 'two');
     if (tuneBox && tune && tune.hidden) { tuneBox.hidden = true; tune.textContent = 'Regola'; }
     onScroll();
-    try { sessionStorage.setItem('motion', mode); } catch (e) {}
   }
-  btn.addEventListener('click', function () {
-    mode = order[(order.indexOf(mode) + 1) % order.length];
-    apply();
-  });
   apply();
 })();
