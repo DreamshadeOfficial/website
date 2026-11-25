@@ -152,6 +152,7 @@ p { margin: 0; }
 #band  { --prev: var(--night-3); --bg: var(--night-4); --mute: #a7b4bb; --faint: #7d8d96; --line: rgba(241, 233, 224, .22); }
 #music, #album, #tour, #merch, #band { background: linear-gradient(180deg, var(--prev) 0, var(--bg) 240px); }
 #merch { padding-top: 0; }
+.signup-zone + #merch { padding-top: clamp(72px, 12vh, 130px); }   /* without Tour, Merch follows the newsletter */
 
 /* ---------- zone 1: opening ---------- */
 .hero { padding: 0; min-height: min(100vh, 980px); display: flex; align-items: flex-end; overflow: hidden; margin-top: -58px; }
@@ -172,6 +173,8 @@ p { margin: 0; }
 .hero-text { width: min(100%, 460px); }
 .hero .eyebrow { color: var(--ink); opacity: .75; }
 /* the release date is the news: it must read at a glance */
+/* a long one-word title (the album) must fit the hero column */
+.hero h1.long { font-size: clamp(34px, 4.4vw, 58px); }
 .out-date { margin: 14px 0 0; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: .02em; color: var(--ink); }
 .out-count { margin: 6px 0 0; font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: var(--mute); }
 .out-count b { font-weight: 500; color: var(--ember); letter-spacing: .04em; font-size: 14px; }
@@ -205,7 +208,7 @@ p { margin: 0; }
 /* ---------- zone 3: album ---------- */
 .album { display: grid; grid-template-columns: minmax(240px, 420px) 1fr; gap: 56px; align-items: center; }
 .album .ph { aspect-ratio: 1; }
-.album.solo { grid-template-columns: minmax(240px, 420px); }
+.album.solo { grid-template-columns: minmax(240px, 420px); justify-content: center; }
 .nights { margin: 30px 0 0; display: flex; align-items: baseline; gap: 14px; }
 .nights b { color: var(--ink); font-size: clamp(56px, 9vw, 104px); line-height: .9; font-weight: 500; letter-spacing: -.04em; }
 .nights span { font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
@@ -359,7 +362,7 @@ p { margin: 0; }
 .contact a.mail { font-size: clamp(18px, 2.4vw, 24px); text-decoration: none; border-bottom: 1px solid var(--line); }
 .contact a.mail:hover { border-bottom-color: var(--ink); }
 .label-logo { margin-top: 18px; }
-.label-logo img { display: block; width: 88px; height: auto; opacity: .8; }
+.label-logo img { display: block; width: 56px; height: auto; opacity: .8; }
 .label-logo a:hover img, .label-logo a:focus-visible img { opacity: 1; }
 .social { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 26px; }
 .social a { font-size: 13px; letter-spacing: .18em; text-transform: uppercase; text-decoration: none; color: var(--mute); }
