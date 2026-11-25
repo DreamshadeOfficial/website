@@ -360,18 +360,19 @@ p { margin: 0; }
 
 .contact { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
 /* e-mail and social links: plain case, larger and lighter than the small spaced-out titles above them */
-.contact a.mail { font-size: 17px; letter-spacing: .01em; text-decoration: none; color: var(--ink); border-bottom: 1px solid var(--line); }
-.contact a.mail:hover, .contact a.mail:focus-visible { border-bottom-color: var(--ember); }
+.contact a.mail { font-size: 17px; letter-spacing: .01em; text-decoration: none; color: #c5cad6; border-bottom: 1px solid var(--line); }
+.contact a.mail:hover, .contact a.mail:focus-visible { color: var(--ink); border-bottom-color: var(--ember); }
 .mgmt .label-logo { margin-top: 18px; }
 @media (min-width: 1024px) {
   .mgmt { display: flex; align-items: center; gap: 24px; }
   .mgmt p, .mgmt .label-logo { margin: 0; }
+  .mgmt .label-logo { order: -1; }   /* wide screens: logo before the e-mail */
 }
 .label-logo img { display: block; width: 56px; height: auto; opacity: .8; }
 .label-logo a:hover img, .label-logo a:focus-visible img { opacity: 1; }
 .social { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 26px; }
-.social a { font-size: 17px; letter-spacing: .01em; text-decoration: none; color: var(--ink); border-bottom: 1px solid var(--line); }
-.social a:hover, .social a:focus-visible { border-bottom-color: var(--ember); }
+.social a { font-size: 17px; letter-spacing: .01em; text-decoration: none; color: #c5cad6; border-bottom: 1px solid var(--line); }
+.social a:hover, .social a:focus-visible { color: var(--ink); border-bottom-color: var(--ember); }
 
 .legal a { color: var(--mute); }
 .legal a:hover, .legal a:focus-visible { color: var(--ink); }
