@@ -171,6 +171,8 @@ p { margin: 0; }
 .hero-copy .wrap { display: flex; justify-content: flex-end; }
 .hero-text { width: min(100%, 460px); }
 .hero .eyebrow { color: var(--ink); opacity: .75; }
+/* the release date is the news: it must read at a glance */
+.out-date { margin: 14px 0 0; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: .02em; color: var(--ink); }
 .hero .eyebrow::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 12px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 12px 2px rgba(224, 134, 63, .6); vertical-align: 1px; }
 
 /* ---------- zone 2: music ---------- */
@@ -179,6 +181,8 @@ p { margin: 0; }
 /* copertine sempre quadrate, video sempre orizzontali */
 .single.with-cover { grid-template-columns: minmax(240px, 420px) 1fr; }
 .cover { aspect-ratio: 1; }
+.single.solo { grid-template-columns: minmax(240px, 420px); margin-top: 0; }
+.single.solo-top { margin-top: 0; }
 .ph.media.cover img { opacity: 1; }
 .links { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--line); }
 .links li { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
@@ -191,6 +195,7 @@ p { margin: 0; }
 /* ---------- zone 3: album ---------- */
 .album { display: grid; grid-template-columns: minmax(240px, 420px) 1fr; gap: 56px; align-items: center; }
 .album .ph { aspect-ratio: 1; }
+.album.solo { grid-template-columns: minmax(240px, 420px); }
 .nights { margin: 30px 0 0; display: flex; align-items: baseline; gap: 14px; }
 .nights b { color: var(--ink); font-size: clamp(56px, 9vw, 104px); line-height: .9; font-weight: 500; letter-spacing: -.04em; }
 .nights span { font-size: 12px; letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
@@ -280,6 +285,9 @@ p { margin: 0; }
 .band .ph { aspect-ratio: 4 / 3; }
 .bio p + p { margin-top: 1em; }
 .bio { color: #c5cad6; }
+.bio-more { margin-top: 1em; }
+.more-btn { margin-top: 18px; padding: 0 0 2px; background: none; border: 0; border-bottom: 1px solid var(--line); color: var(--ink); font: inherit; font-size: 11px; letter-spacing: .28em; text-transform: uppercase; cursor: pointer; }
+.more-btn:hover, .more-btn:focus-visible { border-bottom-color: var(--ink); }
 .lineup { list-style: none; margin: 28px 0 0; padding: 0; border-top: 1px solid var(--line); }
 .lineup li { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .lineup span:last-child { color: var(--mute); font-size: 14px; text-align: right; }
@@ -339,6 +347,9 @@ p { margin: 0; }
 .contact { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
 .contact a.mail { font-size: clamp(18px, 2.4vw, 24px); text-decoration: none; border-bottom: 1px solid var(--line); }
 .contact a.mail:hover { border-bottom-color: var(--ink); }
+.label-logo { margin-top: 18px; }
+.label-logo img { display: block; width: 88px; height: auto; opacity: .8; }
+.label-logo a:hover img, .label-logo a:focus-visible img { opacity: 1; }
 .social { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 26px; }
 .social a { font-size: 13px; letter-spacing: .18em; text-transform: uppercase; text-decoration: none; color: var(--mute); }
 .social a:hover, .social a:focus-visible { color: var(--ink); }

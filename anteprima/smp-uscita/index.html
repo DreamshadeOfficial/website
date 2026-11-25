@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#05080b">
   <title>Dreamshade – Self-Made Paradise out now</title>
-  <link rel="stylesheet" href="assets/site.css?v=d63e19745c">
+  <link rel="stylesheet" href="assets/site.css?v=fcaf5291e9">
 </head>
 <body>
 
@@ -23,7 +23,7 @@
       <a class="logo" href="#top" aria-label="Dreamshade"></a>
       <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav"><span></span><span></span><span></span></button>
       <nav class="nav" id="nav" aria-label="Main">
-        <a href="#music">Music</a>
+        
         <a href="#album">Album</a>
         <a href="#tour">Tour</a>
         <a href="#merch">Merch</a>
@@ -48,8 +48,9 @@
           <div class="hero-text">
             <p class="eyebrow">New single</p>
             <h1>Self-Made Paradise</h1>
+            <p class="out-date">Out now</p>
             <div class="btns">
-              <a class="btn solid" href="#music">Listen</a>
+              <a class="btn solid" href="#album">Listen</a>
             </div>
           </div>
         </div>
@@ -57,30 +58,6 @@
     </section>
 
     <!-- zone 2 -->
-    <section id="music">
-      <div class="wrap">
-        <p class="eyebrow">Music</p>
-        <h2>Self-Made Paradise</h2>
-        <div class="single with-cover">
-          <div class="ph cover">Self-Made Paradise · cover to come</div>
-          <div>
-            <p class="lede">One or two lines about the single. <span class="ph-tag">placeholder</span></p>
-            <ul class="links">
-              <li><span>Spotify</span><span>link to come</span></li>
-              <li><span>Apple Music</span><span>link to come</span></li>
-              <li><span>YouTube</span><span>link to come</span></li>
-              <li><span>All platforms</span><span>ffm.to link to come</span></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="singles">
-          <div><div class="ph media single-cover"><img src="assets/photos/shl-cover.jpg?v=429d5d7e3c" alt="Second Hand Love – single cover" width="800" height="800"></div><p>Second Hand Love</p></div>
-          <div><div class="ph media single-cover"><img src="assets/photos/eots-cover.jpg?v=c6879bf397" alt="End of the Sky – single cover" width="800" height="800"></div><p>End of the Sky</p></div>
-          <div><div class="ph">Self-Made Paradise · cover to come</div><p>Self-Made Paradise</p></div>
-        </div>
-      </div>
-    </section>
 
     <div class="horizon"></div>
 
@@ -259,8 +236,8 @@
             </div>
           </div>
           <ul class="strip covers">
-            <li><a href="#music"><img src="assets/photos/eots-cover.jpg?v=c6879bf397" alt="End of the Sky cover" width="480" height="480" loading="lazy"><span class="rel-title">End of the Sky</span><span class="rel-meta">Single · 2027</span></a></li>
-            <li><a href="#music"><img src="assets/photos/shl-cover.jpg?v=429d5d7e3c" alt="Second Hand Love cover" width="480" height="480" loading="lazy"><span class="rel-title">Second Hand Love</span><span class="rel-meta">Single · 2026</span></a></li>
+            <li><a href="#album"><img src="assets/photos/eots-cover.jpg?v=c6879bf397" alt="End of the Sky cover" width="480" height="480" loading="lazy"><span class="rel-title">End of the Sky</span><span class="rel-meta">Single · 2027</span></a></li>
+            <li><a href="#album"><img src="assets/photos/shl-cover.jpg?v=429d5d7e3c" alt="Second Hand Love cover" width="480" height="480" loading="lazy"><span class="rel-title">Second Hand Love</span><span class="rel-meta">Single · 2026</span></a></li>
             <li><a href="https://ffm.to/dsandzardonic" target="_blank" rel="noopener"><img src="assets/covers/2023_grey-days-peace-of-mind-mix.jpg?v=32cd31736b" alt="Grey Days (Peace of Mind Mix) cover" width="480" height="480" loading="lazy"><span class="rel-title">Grey Days (Peace of Mind Mix)</span><span class="rel-meta">Remix · 2023</span></a></li>
             <li><a href="https://ffm.to/greydaysep" target="_blank" rel="noopener"><img src="assets/covers/2022_grey-days.jpg?v=67b698214e" alt="Grey Days cover" width="480" height="480" loading="lazy"><span class="rel-title">Grey Days</span><span class="rel-meta">EP · 2022</span></a></li>
             <li><a href="https://ffm.to/dreamshaderise" target="_blank" rel="noopener"><img src="assets/covers/2022_rise.jpg?v=5b1c4737c4" alt="Rise cover" width="480" height="480" loading="lazy"><span class="rel-title">Rise</span><span class="rel-meta">Single · 2022</span></a></li>
@@ -311,7 +288,7 @@
           <div>
             <p class="eyebrow">Management &amp; booking</p>
             <p><a class="mail" href="mailto:info@horangmusic.com">info@horangmusic.com</a></p>
-            <p class="lede" style="margin-top:10px;font-size:14px">Horang Music</p>
+            <p class="label-logo"><a href="https://horangmusic.com/" target="_blank" rel="noopener"><img src="assets/horang-music.png?v=c278705d33" alt="Horang Music" width="255" height="116"></a></p>
           </div>
           <div>
             <p class="eyebrow">Follow</p>
@@ -327,7 +304,6 @@
         <div class="legal">
           <span>© Dreamshade</span>
           <span><a href="press/">Press kit</a></span>
-          <span>Anteprima · dashed boxes are placeholders</span>
         </div>
       </div>
     </section>
@@ -340,6 +316,20 @@
       if (!el || !el.dataset.release) return;
       var nights = Math.ceil((new Date(el.dataset.release + 'T00:00:00') - new Date()) / 86400000);
       el.textContent = nights > 0 ? nights : 0;
+    })();
+  </script>
+  <script>
+    // bio: Read more opens the rest of the text, Read less closes it
+    (function () {
+      var b = document.querySelector('.more-btn');
+      if (!b) return;
+      var more = document.getElementById(b.getAttribute('aria-controls'));
+      b.addEventListener('click', function () {
+        var open = more.hidden;
+        more.hidden = !open;
+        b.setAttribute('aria-expanded', open);
+        b.textContent = open ? 'Read less' : 'Read more';
+      });
     })();
   </script>
   <script>
