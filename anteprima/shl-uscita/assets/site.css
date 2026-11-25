@@ -359,8 +359,9 @@ p { margin: 0; }
 .dl span { border-style: dashed; color: var(--faint); }
 
 .contact { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
-.contact a.mail { font-size: clamp(18px, 2.4vw, 24px); text-decoration: none; border-bottom: 1px solid var(--line); }
-.contact a.mail:hover { border-bottom-color: var(--ink); }
+/* the e-mail reads like the social links next to it */
+.contact a.mail { font-size: 13px; letter-spacing: .18em; text-transform: uppercase; text-decoration: none; color: var(--mute); }
+.contact a.mail:hover, .contact a.mail:focus-visible { color: var(--ink); }
 .label-logo { margin-top: 18px; }
 .label-logo img { display: block; width: 56px; height: auto; opacity: .8; }
 .label-logo a:hover img, .label-logo a:focus-visible img { opacity: 1; }
