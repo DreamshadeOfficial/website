@@ -173,6 +173,8 @@ p { margin: 0; }
 .hero .eyebrow { color: var(--ink); opacity: .75; }
 /* the release date is the news: it must read at a glance */
 .out-date { margin: 14px 0 0; font-size: clamp(20px, 2.6vw, 30px); letter-spacing: .02em; color: var(--ink); }
+.out-count { margin: 6px 0 0; font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: var(--mute); }
+.out-count b { font-weight: 500; color: var(--ember); letter-spacing: .04em; font-size: 14px; }
 .hero .eyebrow::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 12px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 12px 2px rgba(224, 134, 63, .6); vertical-align: 1px; }
 
 /* ---------- zone 2: music ---------- */
@@ -191,6 +193,10 @@ p { margin: 0; }
 .links { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--line); }
 .links li { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
 .links span:last-child { color: var(--faint); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; }
+.links li a { display: flex; justify-content: space-between; width: 100%; color: inherit; text-decoration: none; }
+.links li a[target]:hover span:last-child, .links li a[target]:focus-visible span:last-child { color: var(--ember); }
+.player { display: block; width: 100%; height: 152px; margin: 24px 0 0; border: 0; border-radius: 12px; }
+.verse + .player { margin-top: 24px; }
 .singles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
 .singles .ph { aspect-ratio: 1; }
 .singles .ph.media img { opacity: 1; }
@@ -298,6 +304,7 @@ p { margin: 0; }
 
 .sub { margin-top: clamp(72px, 11vh, 120px); }
 .sub > .lede { margin-top: 10px; }
+.signup-zone .sub { margin-top: 0; }
 
 .strip.covers li { flex: 0 0 min(44vw, 200px); }
 .strip.covers a, .strip.covers div { display: block; text-decoration: none; }
