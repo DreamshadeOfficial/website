@@ -176,6 +176,10 @@ p { margin: 0; }
 /* ---------- zone 2: music ---------- */
 .single { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; align-items: center; margin-top: 40px; }
 .video { aspect-ratio: 16 / 9; }
+/* copertine sempre quadrate, video sempre orizzontali */
+.single.with-cover { grid-template-columns: minmax(240px, 420px) 1fr; }
+.cover { aspect-ratio: 1; }
+.ph.media.cover img { opacity: 1; }
 .links { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--line); }
 .links li { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
 .links span:last-child { color: var(--faint); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; }
@@ -344,7 +348,7 @@ p { margin: 0; }
 .legal { margin-top: 90px; padding-bottom: 40px; display: flex; justify-content: space-between; gap: 16px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
 
 @media (max-width: 760px) {
-  .single, .album, .band, .contact, .signup { grid-template-columns: 1fr; gap: 32px; }
+  .single, .single.with-cover, .album, .band, .contact, .signup { grid-template-columns: 1fr; gap: 32px; }
   .map { grid-template-columns: 1fr 1fr; gap: 24px 16px; }
   .map li { font-size: 18px; }
   .singles { grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
