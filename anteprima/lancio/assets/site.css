@@ -183,6 +183,10 @@ p { margin: 0; }
 .cover { aspect-ratio: 1; }
 .single.solo { grid-template-columns: minmax(240px, 420px); margin-top: 0; }
 .single.solo-top { margin-top: 0; }
+/* a line from the song, in place of a description */
+.verse { margin: 0; }
+.verse p { margin: 0; font-size: clamp(20px, 2.2vw, 28px); line-height: 1.35; font-style: italic; color: var(--ink); }
+.verse + .links, h2 + .verse { margin-top: 24px; }
 .ph.media.cover img { opacity: 1; }
 .links { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--line); }
 .links li { display: flex; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
