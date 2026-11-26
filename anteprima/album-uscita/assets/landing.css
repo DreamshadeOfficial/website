@@ -1,0 +1,119 @@
+/* Landing page until Second Hand Love is out (proposal B, chosen by Gian on 26.11.2026): the cover's own language.
+   One font (JetBrains Mono, the font of the cover), small type, dark, grain. No boxes, no big buttons. */
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url(fonts/jetbrains-mono-regular.woff2) format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
+:root {
+  --black: #030507;
+  --ink: #e9e4dc;
+  --dim: rgba(233, 228, 220, .42);
+  --faint: rgba(233, 228, 220, .2);
+  --cyan: #48c2e0;
+  --red: #d8323c;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--black); }
+body {
+  color: var(--ink); font: 12px/1.5 var(--mono); letter-spacing: .02em;
+  -webkit-font-smoothing: antialiased; overflow: hidden;
+}
+a, button { color: inherit; font: inherit; letter-spacing: inherit; }
+button { background: none; border: 0; padding: 0; cursor: pointer; }
+p, h1, h2, ul, ol, figure, blockquote { margin: 0; padding: 0; font-weight: 400; font-size: inherit; }
+img { display: block; }
+
+/* film grain over everything */
+body::after {
+  content: ""; position: fixed; inset: -100px; z-index: 50; pointer-events: none; opacity: .09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1s steps(5) infinite;
+}
+@keyframes grain { 0% { transform: translate(0, 0); } 20% { transform: translate(-40px, 25px); } 40% { transform: translate(30px, -45px); } 60% { transform: translate(-55px, -15px); } 80% { transform: translate(45px, 40px); } 100% { transform: translate(0, 0); } }
+
+/* ---------- the small actions: text, not buttons ---------- */
+.act { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.act a, .act > button { text-decoration: none; text-transform: uppercase; letter-spacing: .18em; border-bottom: 1px solid var(--faint); padding-bottom: 3px; transition: border-color .3s, color .3s; }
+.act a:hover, .act a:focus-visible, .act > button:hover, .act > button:focus-visible, .act > button[aria-expanded="true"] { border-color: var(--ink); }
+.act .lead { color: var(--ink); border-color: var(--ink); }
+
+/* newsletter: a single line that opens on "Notify me" */
+.notify { width: min(420px, 100%); }
+.notify .formkit-form { margin: 0; }
+.notify .formkit-fields { display: flex; align-items: stretch; border-bottom: 1px solid var(--ink); }
+.notify .formkit-field { flex: 1; min-width: 0; }
+.notify .formkit-input { width: 100%; padding: 10px 0; border: 0; background: transparent; color: var(--ink) !important; font: 14px var(--mono); outline: none; border-radius: 0 !important; }
+.notify .formkit-input::placeholder { color: var(--dim); }
+.notify .formkit-submit { flex: 0 0 auto; padding: 0 0 0 16px; background: transparent !important; color: var(--ink) !important; font: 12px var(--mono); letter-spacing: .18em; text-transform: uppercase; border: 0; border-radius: 0 !important; cursor: pointer; }
+.notify .formkit-submit:hover { color: var(--cyan) !important; }
+.notify .formkit-spinner { display: none; }
+.notify .note { margin-top: 8px; color: var(--dim); font-size: 10px; }
+.notify .formkit-powered-by-convertkit-container { display: none; }
+.notify .formkit-alert { list-style: none; margin: 0 0 8px; padding: 0; }
+.notify .formkit-alert:empty { display: none; }
+.notify .formkit-alert-error { color: var(--red); }
+.notify .formkit-alert-success { padding: 10px 0; border-bottom: 1px solid var(--ink); }
+.notify .formkit-input:-webkit-autofill { -webkit-text-fill-color: var(--ink); box-shadow: 0 0 0 100px var(--black) inset; }
+
+/* socials and contacts: the faintest line on the page */
+.foot { display: flex; flex-wrap: wrap; gap: 4px 18px; color: var(--dim); text-transform: uppercase; letter-spacing: .14em; font-size: 10px; }
+.foot a { text-decoration: none; }
+.foot a:hover, .foot a:focus-visible { color: var(--ink); }
+
+/* very short screens (phone on its side): let the page scroll */
+@media (max-height: 520px) { body { overflow: auto; } }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+/* ---------- a light in the dark ---------- */
+
+.b-ghost, .b-light { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.b-ghost img, .b-light img { width: 100%; height: 100%; object-fit: cover; object-position: 34% 50%; }
+.b-ghost { opacity: .05; }
+.b-light {
+  -webkit-mask-image: radial-gradient(circle var(--r, 0px) at var(--x, 50%) var(--y, 50%), #000 0%, rgba(0, 0, 0, .9) 30%, rgba(0, 0, 0, .35) 62%, rgba(0, 0, 0, 0) 100%);
+          mask-image: radial-gradient(circle var(--r, 0px) at var(--x, 50%) var(--y, 50%), #000 0%, rgba(0, 0, 0, .9) 30%, rgba(0, 0, 0, .35) 62%, rgba(0, 0, 0, 0) 100%);
+}
+/* the light has a colour: the cyan of the cover */
+.b-tint { position: fixed; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: screen;
+  background: radial-gradient(circle calc(var(--r, 0px) * .9) at var(--x, 50%) var(--y, 50%), rgba(72, 194, 224, .10), rgba(72, 194, 224, 0) 100%); }
+
+main { position: fixed; inset: 0; z-index: 2; font-size: clamp(11px, .9vw, 13px); }
+.b-band { position: absolute; left: 5vw; top: 4.5vh; letter-spacing: .1em; }
+.b-hint { position: absolute; right: 5vw; top: 4.5vh; color: var(--faint); text-transform: uppercase; letter-spacing: .2em; animation: b-hint 4s ease-in-out infinite; }
+@keyframes b-hint { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+
+/* centre: the verse types itself, then the title */
+.b-words { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(90vw, 760px); text-align: center; pointer-events: none; }
+.b-typed { min-height: 3em; font-size: clamp(15px, 1.5vw, 21px); line-height: 1.5; text-shadow: 0 0 18px rgba(3, 5, 7, .9); }
+.caret { display: inline-block; width: .55em; height: 1.05em; margin-left: 2px; vertical-align: -.15em; background: var(--ink); animation: b-caret 1s steps(1) infinite; }
+@keyframes b-caret { 50% { opacity: 0; } }
+.b-title { margin-top: 5vh; opacity: 0; transform: translateY(8px); transition: opacity 2.4s ease, transform 2.4s ease; }
+.titled .b-title { opacity: 1; transform: none; }
+.b-title h1 { font-size: 12px; letter-spacing: .5em; text-transform: uppercase; color: var(--ink); }
+.b-title p { margin-top: 10px; color: var(--dim); letter-spacing: .14em; text-transform: uppercase; }
+.b-title p span { color: var(--ink); }
+
+/* while the picture is fully open, the words step back */
+.b-words, .b-hint { transition: opacity .8s ease; }
+.revealed .b-words, .revealed .b-hint { opacity: 0; }
+
+.b-act { position: absolute; left: 5vw; bottom: 5vh; display: flex; flex-direction: column; gap: 22px; }
+.b-foot { position: absolute; right: 5vw; bottom: 5vh; justify-content: flex-end; max-width: 46vw; }
+
+@media (max-width: 700px) {
+  main { font-size: 11px; }
+  .b-band { left: 20px; top: 20px; }
+  .b-hint { right: 20px; top: 20px; }
+  .b-words { top: 44%; }
+  .b-act { left: 20px; right: 20px; bottom: 82px; }
+  .b-typed { font-size: 12px; }   /* each line of the verse fits on one line */
+  .b-foot { left: 20px; right: 20px; bottom: 22px; justify-content: flex-start; max-width: none; }
+}

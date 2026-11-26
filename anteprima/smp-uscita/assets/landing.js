@@ -1,4 +1,4 @@
-// Shared by the three landing trials (landing-a/b/c.html): time left, audio preview, hidden newsletter.
+// Landing page (landing.html): time left, the newsletter behind Notify me.
 (function () {
   var root = document.documentElement;
 
@@ -25,28 +25,6 @@
   }
   tick();
   setInterval(tick, 1000);
-
-  /* ---------- audio preview ---------- */
-  document.querySelectorAll('.preview').forEach(function (box) {
-    var a = box.querySelector('audio'), b = box.querySelector('.preview-play');
-    if (!a) return;
-    var bar = box.querySelector('.preview-bar i'), time = box.querySelector('.preview-time');
-    function left() {
-      var s = Math.max(0, Math.round((a.duration || 0) - a.currentTime));
-      time.textContent = Math.floor(s / 60) + ':' + two(s % 60);
-    }
-    b.addEventListener('click', function () { if (a.paused) a.play(); else a.pause(); });
-    a.addEventListener('play', function () { box.classList.add('playing'); root.classList.add('listening'); });
-    a.addEventListener('pause', function () { box.classList.remove('playing'); root.classList.remove('listening'); });
-    a.addEventListener('ended', function () { a.currentTime = 0; });
-    a.addEventListener('timeupdate', function () { bar.style.width = (a.duration ? a.currentTime / a.duration * 100 : 0) + '%'; left(); });
-    a.addEventListener('loadedmetadata', left);
-    box.querySelector('.preview-bar').addEventListener('click', function (e) {
-      if (!a.duration) return;
-      var r = this.getBoundingClientRect();
-      a.currentTime = (e.clientX - r.left) / r.width * a.duration;
-    });
-  });
 
   /* ---------- "Notify me" opens the newsletter field ---------- */
   document.querySelectorAll('[data-open]').forEach(function (b) {
