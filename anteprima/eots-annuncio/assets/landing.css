@@ -100,6 +100,7 @@ main { position: fixed; inset: 0; z-index: 2; font-size: clamp(11px, .9vw, 13px)
 .b-title h1 { font-size: 12px; letter-spacing: .5em; text-transform: uppercase; color: var(--ink); }
 .b-title p { margin-top: 10px; color: var(--dim); letter-spacing: .14em; text-transform: uppercase; }
 .b-title p span { color: var(--ink); }
+.b-title .b-clock { margin-top: 14px; color: var(--ink); font-size: clamp(18px, 1.8vw, 24px); letter-spacing: .14em; font-variant-numeric: tabular-nums; }
 
 /* while the picture is fully open, the words step back */
 .b-words, .b-hint { transition: opacity .8s ease; }

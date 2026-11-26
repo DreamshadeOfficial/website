@@ -16,7 +16,10 @@
     document.querySelectorAll('[data-release]').forEach(function (el) {
       var ms = Math.max(0, release(el) - now());
       var s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor(s / 3600) % 24, m = Math.floor(s / 60) % 60;
-      if (el.dataset.clock !== undefined) {
+      if (el.dataset.clock === 'hms') {
+        // hours, minutes, seconds left in the current night count
+        el.textContent = two(h) + ':' + two(m) + ':' + two(s % 60);
+      } else if (el.dataset.clock !== undefined) {
         el.innerHTML = '<span>' + two(d) + '<small>d</small></span><span>' + two(h) + '<small>h</small></span><span>' + two(m) + '<small>m</small></span><span>' + two(s % 60) + '<small>s</small></span>';
       } else {
         el.textContent = Math.ceil(ms / 86400000);
