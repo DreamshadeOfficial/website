@@ -1,0 +1,52 @@
+/* Trial C: one of thirteen. A huge 02 with the photo inside, the signal breaking up, time running by the second. */
+
+main { position: fixed; inset: 0; z-index: 2; font-size: clamp(11px, .9vw, 13px); }
+.dim { color: var(--dim); }
+
+.c-head { position: absolute; left: 5vw; top: 4.5vh; display: grid; gap: 4px; }
+.c-head h1 { color: var(--ink); }
+
+.c-list { position: absolute; left: 5vw; top: 50%; transform: translateY(-50%); list-style: none; color: var(--faint); line-height: 1.75; z-index: 3; }
+.c-list .on { color: var(--ink); }
+.c-list .on::after { content: ""; display: inline-block; width: .45em; height: .45em; margin-left: .6em; border-radius: 50%; background: var(--red); box-shadow: 0 0 10px 2px rgba(216, 50, 60, .7); vertical-align: .1em; animation: c-beat 1.2s ease-in-out infinite; }
+@keyframes c-beat { 0%, 100% { opacity: .35; } 30% { opacity: 1; } }
+
+/* the number is a window: the photo shows through its (thickened) strokes and drifts slowly inside them */
+.c-ghost { position: fixed; inset: 0; background: url(photos/shl-foto-2200.jpg) 34% 50% / cover no-repeat; opacity: .05; }
+.c-big { position: absolute; left: 50%; top: 50%; width: min(100vh, 74vw); height: auto; transform: translate(-50%, -52%); overflow: visible; pointer-events: none; }
+.c-n { font-family: var(--mono); font-size: 760px; letter-spacing: -60px; stroke-width: 46px; stroke-linejoin: round; }
+.c-photo { transform-box: fill-box; transform-origin: 30% 47%; animation: c-drift 34s ease-in-out infinite alternate; }
+@keyframes c-drift { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.18) translate(-3%, 2%); } }
+
+/* interference: two coloured copies jump out of line, sliced */
+.c-cy, .c-rd { opacity: 0; mix-blend-mode: screen; stroke-width: 0; }
+.c-cy { fill: rgba(72, 194, 224, .32); }
+.c-rd { fill: rgba(216, 50, 60, .32); }
+.glitch .c-cy { opacity: 1; transform: translate(-16px, 4px); animation: c-slice 120ms steps(2) infinite; }
+.glitch .c-rd { opacity: 1; transform: translate(14px, -5px); animation: c-slice 160ms steps(2) infinite reverse; }
+.glitch .c-photo { animation-play-state: paused; filter: contrast(1.5) brightness(1.4); }
+@keyframes c-slice { 0% { clip-path: inset(12% 0 64% 0); } 50% { clip-path: inset(48% 0 30% 0); } 100% { clip-path: inset(70% 0 8% 0); } }
+
+/* time, by the second */
+.c-time { position: absolute; left: 50%; bottom: 5vh; transform: translateX(-50%); text-align: center; }
+.c-when { color: var(--dim); text-transform: uppercase; letter-spacing: .3em; }
+.c-clock { margin-top: 8px; display: flex; gap: .55em; justify-content: center; font-size: clamp(22px, 2.6vw, 40px); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.c-clock small { margin-left: .12em; font-size: .38em; color: var(--dim); letter-spacing: .1em; }
+
+.c-act { position: absolute; right: 5vw; top: 4.5vh; display: flex; flex-direction: column; align-items: flex-end; gap: 22px; }
+.c-act .act { align-items: flex-end; }
+.c-act .notify { width: 340px; order: 2; }
+.c-foot { position: absolute; right: 5vw; bottom: 5vh; justify-content: flex-end; max-width: 26vw; }
+
+@media (max-width: 900px) {
+  main { font-size: 11px; }
+  .c-head { left: 20px; top: 20px; }
+  .c-list { left: 20px; right: 20px; top: calc(47% + 36vw); transform: none; display: flex; flex-wrap: wrap; gap: 0 10px; }
+  .c-big { width: 96vw; top: 47%; }
+  .c-act { left: 20px; right: 20px; top: auto; bottom: 64px; align-items: flex-start; }
+  .c-act .act { align-items: flex-start; }
+  .c-act .notify { width: 100%; order: 0; }
+  .c-time { left: 20px; right: 20px; transform: none; top: 104px; bottom: auto; text-align: left; }
+  .c-clock { justify-content: flex-start; font-size: 26px; }
+  .c-foot { left: 20px; right: 20px; bottom: 22px; justify-content: flex-start; max-width: none; }
+}
