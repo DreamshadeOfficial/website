@@ -182,14 +182,21 @@
     if (!gl) return null;
     holder.insertBefore(canvas, holder.firstChild);
 
-    // the photos behind the page are the covers, newest first, spread over the whole page as you scroll down.
-    // Each one joins when its single (or the album) is announced, so the final site has them all (Gian, 26.11).
+    // the photos behind the page, top to bottom in the order of the album (duality, stasis, threshold, escapism, eternity):
+    // the moodboard photos are always there (bg-1 sand, bg-2 hand behind glass, bg-3 multiple exposure, bg-5 tattoo, bg-6 hand in the light);
+    // each cover joins when its single (or the album) is announced, so the final site has them all (Gian, 26.11).
     //  is written only if the photo exists: SMP and album join as soon as their bg-*.jpg is added.
+    // bg-4 (the eye) is the End of the Sky photo, the same as bg-eots: it is not used before EOTS is announced.
     var zones = [
       
-      
-      'assets/photos/bg-eots.jpg?v=167886c668',
       'assets/photos/bg-shl.jpg?v=1b8181d537',
+      
+      'assets/photos/bg-1.jpg?v=6729426035',
+      'assets/photos/bg-2.jpg?v=0486d98357',
+      'assets/photos/bg-3.jpg?v=74a3de898e',
+      'assets/photos/bg-eots.jpg?v=167886c668',
+      'assets/photos/bg-5.jpg?v=b40fb69bc1',
+      'assets/photos/bg-6.jpg?v=8bc06d94e8',
     ].map(function (src) { return { src: src }; });
 
     var vs = 'attribute vec2 p; varying vec2 v; void main(){ v = p * .5 + .5; v.y = 1. - v.y; gl_Position = vec4(p, 0., 1.); }';
