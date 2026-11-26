@@ -99,8 +99,8 @@ main { position: fixed; inset: 0; z-index: 2; font-size: clamp(11px, .9vw, 13px)
 .titled .b-title { opacity: 1; transform: none; }
 .b-title h1 { font-size: 12px; letter-spacing: .5em; text-transform: uppercase; color: var(--ink); }
 .b-title p { margin-top: 10px; color: var(--dim); letter-spacing: .14em; text-transform: uppercase; }
-.b-title p span { color: var(--ink); }
-.b-title .b-clock { margin-top: 14px; color: var(--ink); font-size: clamp(18px, 1.8vw, 24px); letter-spacing: .14em; font-variant-numeric: tabular-nums; }
+.b-title .b-clock { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.b-title .b-clock b { font-weight: 400; color: var(--ink); }
 
 /* while the picture is fully open, the words step back */
 .b-words, .b-hint { transition: opacity .8s ease; }
@@ -115,6 +115,9 @@ main { position: fixed; inset: 0; z-index: 2; font-size: clamp(11px, .9vw, 13px)
   .b-hint { right: 20px; top: 20px; }
   .b-words { top: 44%; }
   .b-act { left: 20px; right: 20px; bottom: 82px; }
-  .b-typed { font-size: 12px; }   /* each line of the verse fits on one line */
+  .b-typed { font-size: 12px; }
+  .b-out, .b-clock { display: block; }   /* date on one line, the countdown on the next */
+  .b-out { margin-bottom: 6px; }
+  .b-sep { display: none; }   /* each line of the verse fits on one line */
   .b-foot { left: 20px; right: 20px; bottom: 22px; justify-content: flex-start; max-width: none; }
 }
