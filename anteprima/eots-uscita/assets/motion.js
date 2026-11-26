@@ -182,12 +182,15 @@
     if (!gl) return null;
     holder.insertBefore(canvas, holder.firstChild);
 
-    // which photo sits behind which part of the page (id of the block where it takes over)
-    // the photos are the singles' covers: each one appears only once its single is announced
+    // the photos behind the page are the covers, newest first, spread over the whole page as you scroll down.
+    // Each one joins when its single (or the album) is announced, so the final site has them all (Gian, 26.11).
+    //  is written only if the photo exists: SMP and album join as soon as their bg-*.jpg is added.
     var zones = [
-      { id: 'music', src: 'assets/photos/bg-eots.jpg?v=167886c668' },
-      { id: 'band', src: 'assets/photos/bg-shl.jpg?v=1b8181d537' }
-    ].filter(function (z) { return document.getElementById(z.id); });
+      
+      
+      'assets/photos/bg-eots.jpg?v=167886c668',
+      'assets/photos/bg-shl.jpg?v=1b8181d537',
+    ].map(function (src) { return { src: src }; });
 
     var vs = 'attribute vec2 p; varying vec2 v; void main(){ v = p * .5 + .5; v.y = 1. - v.y; gl_Position = vec4(p, 0., 1.); }';
     var fs = [
@@ -269,7 +272,7 @@
       return tx;
     }
 
-    var ready = false, running = false, tops = [];
+    var ready = false, running = false, tops = [], stasisA = -1, stasisB = -1;
     var cur = { x: 0, y: 0 }, ptr = { x: 0, y: 0 };
     var lastY = window.scrollY, vel = 0, flash = 0, nextFlash = 4000;
     // every value is a multiplier of the built-in amount: 1 = as first designed, 0 = off.
@@ -285,10 +288,13 @@
       canvas.height = Math.max(2, Math.round(window.innerHeight * k));
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.uniform1f(U.ca, canvas.width / canvas.height);
-      tops = zones.map(function (z) {
-        var el = document.getElementById(z.id);
-        return el ? el.getBoundingClientRect().top + window.scrollY : 0;
-      });
+      // photo k takes over at k/n of the way down the page
+      var max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      tops = zones.map(function (z, k) { return window.innerHeight * 0.5 + k * max / zones.length; });
+      // stasis: from the Music zone to the next block
+      var mu = document.getElementById('music'), nx = document.getElementById('album') || document.getElementById('band');
+      stasisA = mu ? mu.getBoundingClientRect().top + window.scrollY : -1;
+      stasisB = nx ? nx.getBoundingClientRect().top + window.scrollY : -1;
     }
 
     function frame(now) {
@@ -296,8 +302,8 @@
       requestAnimationFrame(frame);
       if (P.sharp !== sharpNow) resize();
       var y = window.scrollY, vh = window.innerHeight;
-      // stasis: between the start of the Music zone and the Album zone, the clock slows to a halt
-      var inStasis = tops.length > 1 && (y + vh * 0.5) >= tops[0] && (y + vh * 0.5) < tops[1];
+      // stasis: between the start of the Music zone and the next block, the clock slows to a halt
+      var inStasis = stasisA >= 0 && stasisB > stasisA && (y + vh * 0.5) >= stasisA && (y + vh * 0.5) < stasisB;
       still += ((inStasis ? 1 : 0) - still) * 0.04;
       root.classList.toggle('stasis', still > 0.85);
       clock += Math.min(100, now - (lastNow || now)) * P.speed * (1 - still); lastNow = now;
