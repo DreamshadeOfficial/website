@@ -98,10 +98,11 @@ main { position: fixed; inset: 0; z-index: 2; font-size: clamp(11px, .9vw, 13px)
 @keyframes b-caret { 50% { opacity: 0; } }
 .b-title { margin-top: 5vh; opacity: 0; transform: translateY(8px); transition: opacity .8s ease, transform .8s ease; }
 .titled .b-title { opacity: 1; transform: none; }
-.b-title h1 { font-size: clamp(17px, 1.7vw, 24px); letter-spacing: .42em; margin-right: -.42em; text-transform: uppercase; color: var(--ink); }
+.b-title h1 { font-size: clamp(24px, 2.5vw, 36px); letter-spacing: .38em; margin-right: -.38em; text-transform: uppercase; color: var(--ink); }
 .b-title p { margin-top: 16px; color: var(--dim); letter-spacing: .14em; text-transform: uppercase; }
-/* the date stands out in the site's orange; the countdown sits under it */
-.b-title .b-out { display: block; margin-bottom: 8px; color: var(--ember); font-size: clamp(14px, 1.3vw, 18px); letter-spacing: .24em; text-shadow: 0 0 18px rgba(224, 134, 63, .35); }
+/* the date stands out: brighter and larger, with the site's orange dot; the countdown sits under it */
+.b-title .b-out { display: block; margin-bottom: 8px; color: var(--ink); font-size: clamp(14px, 1.3vw, 18px); letter-spacing: .24em; }
+.b-title .b-out::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 12px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 12px 2px rgba(224, 134, 63, .6); vertical-align: .2em; }
 .b-title .b-sep { display: none; }
 .b-title .b-clock { display: block; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .b-title .b-clock b { font-weight: 400; color: var(--ink); }
@@ -119,6 +120,7 @@ main { position: fixed; inset: 0; z-index: 2; font-size: clamp(11px, .9vw, 13px)
   .b-hint { right: 20px; top: 20px; }
   .b-words { top: 44%; }
   .b-act { left: 20px; right: 20px; bottom: 82px; }
+  .b-title h1 { font-size: 20px; letter-spacing: .3em; margin-right: -.3em; }   /* fits one line on a phone */
   .b-typed { font-size: 12px; }   /* each line of the verse fits on one line */
   .b-foot { left: 20px; right: 20px; bottom: 22px; justify-content: flex-start; max-width: none; }
 }
