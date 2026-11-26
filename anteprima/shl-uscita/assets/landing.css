@@ -95,7 +95,7 @@ main { position: fixed; inset: 0; z-index: 2; font-size: clamp(11px, .9vw, 13px)
 .b-typed { min-height: 3em; font-size: clamp(15px, 1.5vw, 21px); line-height: 1.5; text-shadow: 0 0 18px rgba(3, 5, 7, .9); }
 .caret { display: inline-block; width: .55em; height: 1.05em; margin-left: 2px; vertical-align: -.15em; background: var(--ink); animation: b-caret 1s steps(1) infinite; }
 @keyframes b-caret { 50% { opacity: 0; } }
-.b-title { margin-top: 5vh; opacity: 0; transform: translateY(8px); transition: opacity 2.4s ease, transform 2.4s ease; }
+.b-title { margin-top: 5vh; opacity: 0; transform: translateY(8px); transition: opacity 1.2s ease, transform 1.2s ease; }
 .titled .b-title { opacity: 1; transform: none; }
 .b-title h1 { font-size: 12px; letter-spacing: .5em; text-transform: uppercase; color: var(--ink); }
 .b-title p { margin-top: 10px; color: var(--dim); letter-spacing: .14em; text-transform: uppercase; }
