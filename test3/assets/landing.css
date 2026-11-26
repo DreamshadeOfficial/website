@@ -14,6 +14,7 @@
   --faint: rgba(233, 228, 220, .2);
   --cyan: #48c2e0;
   --red: #d8323c;
+  --ember: #e0863f;   /* the orange of the site */
   --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
 }
 * { box-sizing: border-box; }
@@ -95,11 +96,14 @@ main { position: fixed; inset: 0; z-index: 2; font-size: clamp(11px, .9vw, 13px)
 .b-typed { min-height: 3em; font-size: clamp(15px, 1.5vw, 21px); line-height: 1.5; text-shadow: 0 0 18px rgba(3, 5, 7, .9); }
 .caret { display: inline-block; width: .55em; height: 1.05em; margin-left: 2px; vertical-align: -.15em; background: var(--ink); animation: b-caret 1s steps(1) infinite; }
 @keyframes b-caret { 50% { opacity: 0; } }
-.b-title { margin-top: 5vh; opacity: 0; transform: translateY(8px); transition: opacity 1.2s ease, transform 1.2s ease; }
+.b-title { margin-top: 5vh; opacity: 0; transform: translateY(8px); transition: opacity .8s ease, transform .8s ease; }
 .titled .b-title { opacity: 1; transform: none; }
-.b-title h1 { font-size: 12px; letter-spacing: .5em; text-transform: uppercase; color: var(--ink); }
-.b-title p { margin-top: 10px; color: var(--dim); letter-spacing: .14em; text-transform: uppercase; }
-.b-title .b-clock { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.b-title h1 { font-size: clamp(17px, 1.7vw, 24px); letter-spacing: .42em; margin-right: -.42em; text-transform: uppercase; color: var(--ink); }
+.b-title p { margin-top: 16px; color: var(--dim); letter-spacing: .14em; text-transform: uppercase; }
+/* the date stands out in the site's orange; the countdown sits under it */
+.b-title .b-out { display: block; margin-bottom: 8px; color: var(--ember); font-size: clamp(14px, 1.3vw, 18px); letter-spacing: .24em; text-shadow: 0 0 18px rgba(224, 134, 63, .35); }
+.b-title .b-sep { display: none; }
+.b-title .b-clock { display: block; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .b-title .b-clock b { font-weight: 400; color: var(--ink); }
 
 /* while the picture is fully open, the words step back */
@@ -115,9 +119,6 @@ main { position: fixed; inset: 0; z-index: 2; font-size: clamp(11px, .9vw, 13px)
   .b-hint { right: 20px; top: 20px; }
   .b-words { top: 44%; }
   .b-act { left: 20px; right: 20px; bottom: 82px; }
-  .b-typed { font-size: 12px; }
-  .b-out, .b-clock { display: block; }   /* date on one line, the countdown on the next */
-  .b-out { margin-bottom: 6px; }
-  .b-sep { display: none; }   /* each line of the verse fits on one line */
+  .b-typed { font-size: 12px; }   /* each line of the verse fits on one line */
   .b-foot { left: 20px; right: 20px; bottom: 22px; justify-content: flex-start; max-width: none; }
 }

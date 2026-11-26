@@ -15,7 +15,7 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="assets/landing.css?v=5707f07e1f">
+  <link rel="stylesheet" href="assets/landing.css?v=6e75fd04c1">
 </head>
 <body>
 
@@ -134,10 +134,10 @@
       function type() {
         i++;
         out.innerHTML = all.slice(0, i).replace(/\n/g, '<br>') + '<i class="caret"></i>';
-        if (i < all.length) setTimeout(type, all[i - 1] === '\n' ? 300 : 16 + Math.random() * 28);
-        else setTimeout(function () { root.classList.add('titled'); }, 200);
+        if (i < all.length) setTimeout(type, all[i - 1] === '\n' ? 150 : 6 + Math.random() * 10);
+        else setTimeout(function () { root.classList.add('titled'); }, 100);
       }
-      if (reduce) { out.innerHTML = lines.join('<br>'); root.classList.add('titled'); } else setTimeout(type, 500);
+      if (reduce) { out.innerHTML = lines.join('<br>'); root.classList.add('titled'); } else setTimeout(type, 300);
     })();
   </script>
   <script src="assets/landing.js?v=0a009bb2a2"></script>
